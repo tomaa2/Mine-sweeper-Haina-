@@ -1,2 +1,2 @@
 # Mine-sweeper-Haina-
-Software Engineering Project
+Software Development Project
