@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HelpController">
+
+    <children>
+        <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+            <!-- TOP BAR: back + title -->
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets bottom="10.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Back to previous screen -->
+                        <Label fx:id="backLabel" text="← Back">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </Label>
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <Label text="Help &amp; Game Rules">
+                            <font>
+                                <Font size="28.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+            </top>
+
+            <!-- CENTER: scrollable help content -->
+            <center>
+                <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
+                    <content>
+                        <VBox spacing="22.0">
+                            <padding>
+                                <Insets bottom="40.0" left="40.0" right="40.0" top="20.0" />
+                            </padding>
+
+                            <!-- 1. Overview -->
+                            <children>
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="1. Overview">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="This version of Minesweeper is a cooperative two–player game. Each player has their own board, but you share lives, score and turns. The goal is to reveal all safe tiles on both boards while keeping the shared lives above zero and maximizing the total score." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 2. Board sizes & difficulties -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="2. Board Sizes &amp; Difficulties">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Each game has two identical boards, one per player. The size depends on the selected difficulty:&#10;&#10;• Easy – each board is 9×9 (81 tiles).&#10;• Medium – each board is 13×13 (169 tiles).&#10;• Hard – each board is 16×16 (256 tiles)." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 3. Tile types -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="3. Tile Types">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="• Mine tile – reveals a mine. Revealing it costs 1 life. Flagging it correctly gives +1 point and marks the mine as found.&#10;&#10;• Number tile – shows a number 1–8 indicating how many mines are in the eight neighbouring tiles. Revealing it gives +1 point. Flagging a non–mine number tile costs 3 points.&#10;&#10;• Empty tile – has no adjacent mines. Revealing it gives +1 point; flagging it costs 3 points. Revealing an empty tile triggers a cascade that automatically reveals connected empty tiles and the numbers around them.&#10;&#10;• Surprise tile – looks like a gift. It behaves like an empty tile when revealed or flagged, but after it is revealed you may activate it once. Activating costs points (see difficulty rules) and has a 50–50 chance to be a good or bad surprise. Good surprises give lives and points; bad surprises remove lives and points.&#10;&#10;• Question tile – marked with a question mark. It also behaves like an empty tile when revealed or flagged, but after it is revealed you may activate a trivia question once. Activating costs points (see difficulty rules). A correct or wrong answer changes lives and points according to question level and difficulty." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 4. Players, lives and score -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="4. Players, Lives &amp; Score">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="• The game is always played by two players.&#10;• Both players share one pool of lives (hearts) and a single score counter.&#10;• The initial number of lives depends on the game difficulty (see below).&#10;• You can gain or lose lives through surprises and question answers. The total number of lives can never exceed 10; any extra lives above 10 are converted into points equal to the activation cost of a question or surprise tile for the current difficulty.&#10;• Score starts at 0 and changes when you reveal or flag tiles, answer questions or trigger surprises." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 5. Difficulty rules (mines / questions / surprises / lives / activation cost) -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="5. Difficulty Rules">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Easy:&#10;• Each board has 10 mines, 6 question tiles and 2 surprise tiles.&#10;• You start with 10 shared lives.&#10;• Activating a question or surprise tile costs 5 points.&#10;• Good surprise: +1 life and +8 points.&#10;• Bad surprise: −1 life and −8 points.&#10;&#10;Medium:&#10;• Each board has 26 mines, 7 question tiles and 3 surprise tiles.&#10;• You start with 8 shared lives.&#10;• Activating a question or surprise tile costs 8 points.&#10;• Good surprise: +1 life and +12 points.&#10;• Bad surprise: −1 life and −12 points.&#10;&#10;Hard:&#10;• Each board has 44 mines, 11 question tiles and 4 surprise tiles.&#10;• You start with 6 shared lives.&#10;• Activating a question or surprise tile costs 12 points.&#10;• Good surprise: +1 life and +16 points.&#10;• Bad surprise: −1 life and −16 points." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 6. Question levels and effects (summary) -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="6. Question Levels &amp; Effects">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Every question tile has a difficulty: Easy, Medium, Hard or Expert. Answering correctly usually grants points and lives; answering incorrectly may remove points and lives. The exact effect depends on both the game difficulty and question level. In some cases there is a 50% chance between two possible outcomes.&#10;&#10;Examples:&#10;• On Easy game difficulty, an easy question can give +3 points and +1 life for a correct answer, but a wrong answer can cost 3 points or have no effect.&#10;• On Medium and Hard game difficulties the point and life changes are larger, and expert questions can give big rewards but also heavy penalties.&#10;&#10;For precise values, see the question result table in the project documentation or in the question popup." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <!-- 7. Board generation & game end -->
+                                <VBox spacing="6.0">
+                                    <children>
+                                        <Label text="7. Board Generation &amp; Game End">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Label text="Board generation: mines are placed randomly on each board. Then each remaining tile is classified according to the number of neighbouring mines (0–8). Some empty tiles are turned into question tiles and some into surprise tiles, chosen at random.&#10;&#10;Turn flow: players take turns. On your turn you may reveal tiles, place or remove flags, or activate a revealed question or surprise tile on your own board. When you reveal a tile, the turn usually passes to the other player.&#10;&#10;Game end: the game ends when one player has revealed all mines on their board or when the shared lives reach zero. At the end, both boards are fully revealed. Any remaining lives are converted into points using the activation cost of the current difficulty." wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </center>
+
+        </BorderPane>
+    </children>
+</AnchorPane>

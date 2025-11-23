@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controller.GameHistoryController"
+            prefWidth="900.0" prefHeight="600.0">
+
+    <children>
+        <BorderPane AnchorPane.topAnchor="0.0"
+                    AnchorPane.bottomAnchor="0.0"
+                    AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0">
+
+            <!-- TOP BAR: back + title + clear -->
+            <top>
+                <HBox alignment="CENTER_LEFT"
+                      spacing="10.0"
+                      BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="20.0" left="40.0" right="40.0" bottom="10.0"/>
+                    </padding>
+                    <children>
+                        <!-- Back to menu -->
+                        <Label fx:id="backLabel" text="← Back to Menu">
+                            <font>
+                                <Font size="16.0"/>
+                            </font>
+                        </Label>
+
+                        <!-- Spacer -->
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <!-- Page title -->
+                        <Label text="Game History">
+                            <font>
+                                <Font size="28.0"/>
+                            </font>
+                        </Label>
+
+                        <!-- Spacer -->
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <!-- Clear history button -->
+                        <Button fx:id="clearHistoryButton"
+                                text="Clear History"
+                                mnemonicParsing="false"/>
+                    </children>
+                </HBox>
+            </top>
+
+            <!-- CENTER: stats + recent games -->
+            <center>
+                <VBox spacing="20.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="10.0" left="40.0" right="40.0" bottom="30.0"/>
+                    </padding>
+
+                    <children>
+
+                        <!-- SUMMARY CARDS ROW -->
+                        <HBox spacing="20.0" alignment="CENTER_LEFT">
+                            <children>
+
+                                <!-- Card 1: Total Games -->
+                                <VBox spacing="10.0" prefWidth="180.0" prefHeight="100.0">
+                                    <padding>
+                                        <Insets top="16.0" left="16.0" right="16.0" bottom="16.0"/>
+                                    </padding>
+                                    <children>
+                                        <Label fx:id="totalGamesValueLabel" text="0">
+                                            <font>
+                                                <Font size="24.0"/>
+                                            </font>
+                                        </Label>
+                                        <Label text="Total Games">
+                                            <font>
+                                                <Font size="14.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Card 2: Victories -->
+                                <VBox spacing="10.0" prefWidth="180.0" prefHeight="100.0">
+                                    <padding>
+                                        <Insets top="16.0" left="16.0" right="16.0" bottom="16.0"/>
+                                    </padding>
+                                    <children>
+                                        <Label fx:id="victoriesValueLabel" text="0">
+                                            <font>
+                                                <Font size="24.0"/>
+                                            </font>
+                                        </Label>
+                                        <Label text="Victories">
+                                            <font>
+                                                <Font size="14.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Card 3: Win Rate -->
+                                <VBox spacing="10.0" prefWidth="180.0" prefHeight="100.0">
+                                    <padding>
+                                        <Insets top="16.0" left="16.0" right="16.0" bottom="16.0"/>
+                                    </padding>
+                                    <children>
+                                        <Label fx:id="winRateValueLabel" text="0.0%">
+                                            <font>
+                                                <Font size="24.0"/>
+                                            </font>
+                                        </Label>
+                                        <Label text="Win Rate">
+                                            <font>
+                                                <Font size="14.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                                <!-- Card 4: Best Time -->
+                                <VBox spacing="10.0" prefWidth="180.0" prefHeight="100.0">
+                                    <padding>
+                                        <Insets top="16.0" left="16.0" right="16.0" bottom="16.0"/>
+                                    </padding>
+                                    <children>
+                                        <Label fx:id="bestTimeValueLabel" text="-">
+                                            <font>
+                                                <Font size="24.0"/>
+                                            </font>
+                                        </Label>
+                                        <Label text="Best Time">
+                                            <font>
+                                                <Font size="14.0"/>
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </VBox>
+
+                            </children>
+                        </HBox>
+
+                        <!-- RECENT GAMES TITLE -->
+                        <Label text="Recent Games">
+                            <font>
+                                <Font size="18.0"/>
+                            </font>
+                        </Label>
+
+                        <!-- RECENT GAMES LIST -->
+                        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                            <content>
+                                <!-- Container for all game entries -->
+                                <VBox fx:id="gamesListContainer"
+                                      spacing="10.0">
+                                    <padding>
+                                        <Insets top="10.0" left="0.0" right="0.0" bottom="10.0"/>
+                                    </padding>
+
+                                    <!-- SAMPLE ROW (you can keep it as template / placeholder) -->
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT"
+                                          prefHeight="60.0">
+                                        <padding>
+                                            <Insets top="10.0" left="16.0" right="16.0" bottom="10.0"/>
+                                        </padding>
+                                        <children>
+                                            <!-- Optional status icon -->
+                                            <ImageView fitHeight="24.0" fitWidth="24.0"
+                                                       pickOnBounds="true" preserveRatio="true">
+                                                <!-- replace with your own icon path if you have one -->
+                                                <image>
+                                                    <Image url="@../../Downloads/bomb.png"/>
+                                                </image>
+                                            </ImageView>
+
+                                            <!-- Result + date/time -->
+                                            <VBox spacing="2.0">
+                                                <children>
+                                                    <Label text="Defeat">
+                                                        <font>
+                                                            <Font size="14.0"/>
+                                                        </font>
+                                                    </Label>
+                                                    <Label text="11/11/2025, 19:06:58"/>
+                                                </children>
+                                            </VBox>
+
+                                            <!-- spacer -->
+                                            <Region HBox.hgrow="ALWAYS"/>
+
+                                            <!-- Right side chips: difficulty + time -->
+                                            <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                                                <children>
+                                                    <!-- Difficulty -->
+                                                    <Label text="easy">
+                                                        <font>
+                                                            <Font size="12.0"/>
+                                                        </font>
+                                                    </Label>
+                                                    <!-- Duration -->
+                                                    <Label text="57s">
+                                                        <font>
+                                                            <Font size="12.0"/>
+                                                        </font>
+                                                    </Label>
+                                                </children>
+                                            </HBox>
+                                        </children>
+                                    </HBox>
+
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+
+                    </children>
+                </VBox>
+            </center>
+
+        </BorderPane>
+    </children>
+</AnchorPane>
