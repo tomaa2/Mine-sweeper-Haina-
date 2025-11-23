@@ -17,7 +17,6 @@ public class Game {
 		this.player2 = player2;
 		this.difficulty = difficulty;
 		this.score = 0;
-		this.lives = 10;
 		initializeGame();
 		initializeBombs();
 		initializeSpecialCells();
@@ -30,10 +29,17 @@ public class Game {
         case EASY -> 9;
         case MEDIUM -> 13;
         case HARD -> 16;
-    };
-
+		};
+		
+    	int livesNum = switch (difficulty) {
+    	case EASY -> 10;
+        case MEDIUM -> 8;
+        case HARD -> 6;
+    	};
+    	
     this.boards[0] = new Board(size, size);
     this.boards[1] = new Board(size, size);
+    this.lives = livesNum;
 	}
 	
 
@@ -71,8 +77,8 @@ public class Game {
 				numOfSur = 3;
 				break;
 			case HARD:
-				numOfQues = 0;
-				numOfSur = 0;
+				numOfQues = 11;
+				numOfSur = 4;
 				break;
 		}
 		this.boards[0].placeSpecials(numOfQues, numOfSur);
@@ -88,10 +94,16 @@ public class Game {
         return player2;
     }
     
-    public Board[] getBoard1() {
+    public Board[] getBoards() {
     	return boards;
     }
     
+    //get one of the board
+    public Board getBoard(int index) {
+    	if(index>1 || index<0)
+    		System.out.println("ERROR!!!!!!!!! the index should be 0 or 1 only!!!");
+    	return boards[index];
+    }
    
     
 //    public Board getBoard2() {
@@ -102,6 +114,8 @@ public class Game {
         return difficulty;
     }
     
+    
+    
     public int getScore() {
     	return score;
     }
@@ -109,4 +123,19 @@ public class Game {
     public int getLives() {
     	return lives;
     }
+    
+    //add score
+    public void addScore(int points) {
+    	this.score+=points;
+    }
+    
+    public void addLifes(int life) {
+    	this.lives+= life;
+    }
+    //lose life
+    public void loseLife() {
+    	this.lives--;
+    }
+    
+    
 }
