@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GameSetupController">
+
+    <children>
+
+        <!-- Main layout that resizes with window -->
+        <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+            <!-- TOP BAR: back + title -->
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets bottom="10.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Back to menu -->
+                        <Label fx:id="backToMenuLabel" text="← Back to Menu">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </Label>
+
+                        <!-- Spacer to center title -->
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <!-- Page title -->
+                        <Label text="Game Setup">
+                            <font>
+                                <Font size="28.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+            </top>
+
+            <!-- CENTER: main card -->
+            <center>
+                <AnchorPane BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="20.0" />
+                    </padding>
+                    <children>
+                        <!-- Card box -->
+                        <AnchorPane fx:id="cardPane" prefHeight="440.0" prefWidth="780.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <VBox alignment="TOP_LEFT" spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="20.0">
+                                    <children>
+
+                                        <!-- Header: icon + mode title -->
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <ImageView fitHeight="46.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                                                    <!-- Replace with your own icon path if needed -->
+                                                    <image>
+                                                        <Image url="@../../Downloads/two-businessmen-salutation.png" />
+                                                    </image>
+                                                </ImageView>
+                                                <Label fx:id="modeTitleLabel" text="Two-Player Cooperative Mode">
+                                                    <font>
+                                                        <Font size="22.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Player name labels -->
+                                        <HBox alignment="CENTER_LEFT" spacing="40.0">
+                                            <children>
+                                                <Label text="Player 1 Name">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Region prefHeight="20.0" prefWidth="300.0" HBox.hgrow="ALWAYS" />
+                                                <Label text="Player 2 Name">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                       <HBox.margin>
+                                          <Insets right="189.0" />
+                                       </HBox.margin>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Player name fields -->
+                                        <HBox alignment="CENTER_LEFT" spacing="40.0">
+                                            <children>
+                                                <TextField fx:id="player1Field" prefWidth="280.0" promptText="Enter name" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <TextField fx:id="player2Field" prefWidth="280.0" promptText="Enter name" />
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Difficulty label -->
+                                        <Label text="Select Difficulty">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </Label>
+
+                                        <!-- Difficulty buttons row -->
+                                        <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                            <children>
+                                                <Button fx:id="easyButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="241.0" text="Easy&#10;9×9" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="mediumButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="241.0" text="Medium&#10;13×13" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="hardButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="237.0" text="Hard&#10;16×16" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Game rules: title + multiline label -->
+                                        <VBox fx:id="rulesBox" alignment="TOP_LEFT" spacing="5.0">
+                                            <padding>
+                                                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                            </padding>
+                                            <children>
+                                                <!-- This title will change: "Game Rules – Easy", etc. -->
+                                                <Label fx:id="rulesTitleLabel" text="Game Rules – Easy:">
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <!-- Multiline body, changed in controller when difficulty changes -->
+                                                <Label fx:id="rulesBodyLabel" prefHeight="205.0" prefWidth="375.0" text="• Each player has their own board to clear&#10;• You share 10 lives – hitting a mine costs 1 life&#10;• Both players must clear their boards to win&#10;• Work together and strategize!" wrapText="true" />
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Start Game button centered -->
+                                        <HBox alignment="CENTER">
+                                            <children>
+                                                <Button fx:id="startGameButton" mnemonicParsing="false" prefHeight="48.0" prefWidth="520.0" text="Start Game" />
+                                            </children>
+                                        </HBox>
+
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </AnchorPane>
+            </center>
+
+        </BorderPane>
+
+        <!-- Bottom-right help & rules button (outside the card) -->
+        <Button fx:id="helpButton" mnemonicParsing="false" text="Help And Full Rules" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0" />
+
+    </children>
+</AnchorPane>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controller.GameController"
+            prefWidth="1200.0" prefHeight="700.0">
+
+    <children>
+        <BorderPane AnchorPane.topAnchor="0.0"
+                    AnchorPane.bottomAnchor="0.0"
+                    AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0">
+
+            <!-- TOP BAR -->
+            <top>
+                <VBox spacing="10.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="15.0" left="30.0" right="30.0" bottom="10.0"/>
+                    </padding>
+
+                    <children>
+                        <!-- Row 1: Back + title + New Game -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label fx:id="backToMenuLabel" text="← Back to Menu">
+                                    <font><Font size="16.0"/></font>
+                                </Label>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Label text="Cooperative Minesweeper">
+                                    <font><Font size="26.0"/></font>
+                                </Label>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Button fx:id="newGameButton"
+                                        text="New Game"
+                                        mnemonicParsing="false"/>
+                            </children>
+                        </HBox>
+
+                        <!-- Row 2: Status bar -->
+                        <HBox spacing="20.0" alignment="CENTER_LEFT">
+                            <padding>
+                                <Insets top="10.0" left="0.0" right="0.0" bottom="0.0"/>
+                            </padding>
+                            <children>
+                                <!-- Turn timer -->
+                                <Label fx:id="turnLabel" text="Turn: 0s">
+                                    <font><Font size="16.0"/></font>
+                                </Label>
+
+                                <!-- Hearts (you can later replace with icons) -->
+                                <HBox spacing="5.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="Lives:"/>
+                                        <Label fx:id="livesLabel" text="10"/>
+                                    </children>
+                                </HBox>
+
+                                <!-- Current player -->
+                                <Label fx:id="currentPlayerLabel" text="Current: -">
+                                    <font><Font size="16.0"/></font>
+                                </Label>
+
+                                <!-- Reveal / Flag mode button -->
+                                <Button fx:id="modeButton"
+                                        text="Reveal Mode"
+                                        mnemonicParsing="false"/>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <!-- Shared score -->
+                                <Label fx:id="scoreLabel" text="Score: 0">
+                                    <font><Font size="16.0"/></font>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </top>
+
+            <!-- CENTER: two player boards -->
+            <center>
+                <HBox spacing="20.0" BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="20.0" left="20.0" right="20.0" bottom="20.0"/>
+                    </padding>
+
+                    <children>
+                        <!-- Player 1 panel -->
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Label text="●"/>
+                                        <Label fx:id="player1NameLabel" text="Player 1">
+                                            <font><Font size="16.0"/></font>
+                                        </Label>
+
+                                        <Region HBox.hgrow="ALWAYS"/>
+
+                                        <Label fx:id="player1FlagsLabel" text="0/40"/>
+                                    </children>
+                                </HBox>
+
+                                <GridPane fx:id="player1Grid"
+                                          hgap="2.0" vgap="2.0"
+                                          VBox.vgrow="ALWAYS"
+                                          GridPane.hgrow="ALWAYS"
+                                          GridPane.vgrow="ALWAYS">
+                                    <padding>
+                                        <Insets top="5.0" left="5.0" right="5.0" bottom="5.0"/>
+                                    </padding>
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <!-- Player 2 panel -->
+                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <children>
+                                        <Label text="●"/>
+                                        <Label fx:id="player2NameLabel" text="Player 2">
+                                            <font><Font size="16.0"/></font>
+                                        </Label>
+
+                                        <Region HBox.hgrow="ALWAYS"/>
+
+                                        <Label fx:id="player2FlagsLabel" text="0/40"/>
+                                    </children>
+                                </HBox>
+
+                                <GridPane fx:id="player2Grid"
+                                          hgap="2.0" vgap="2.0"
+                                          VBox.vgrow="ALWAYS"
+                                          GridPane.hgrow="ALWAYS"
+                                          GridPane.vgrow="ALWAYS">
+                                    <padding>
+                                        <Insets top="5.0" left="5.0" right="5.0" bottom="5.0"/>
+                                    </padding>
+                                </GridPane>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </center>
+
+        </BorderPane>
+    </children>
+</AnchorPane>
