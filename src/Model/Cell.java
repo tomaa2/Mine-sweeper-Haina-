@@ -7,6 +7,7 @@ public class Cell {
 	private int adjacentBombs; 	  //only for number cells
 	private int row;
     private int col;
+    private boolean flagged;
     
     
     public Cell() {
@@ -18,6 +19,7 @@ public class Cell {
     	this.col=col;
     	this.isRevealed=false;
     	this.isUsed=false;
+    	this.flagged=false;
     }
 
 
@@ -31,12 +33,12 @@ public class Cell {
 	}
 
 
-	public boolean isReveald() {
+	public boolean isRevealed() {
 		return isRevealed;
 	}
 
 
-	public void setReveald(boolean isReveald) {
+	public void setRevealed(boolean isReveald) {
 		this.isRevealed = isReveald;
 	}
 
@@ -79,6 +81,13 @@ public class Cell {
 	public void setCol(int col) {
 		this.col = col;
 	}
+	
+	public boolean isFlagged() {
+		return flagged;
+	}
     
+	public void setFlagged(boolean flagged) {
+		this.flagged=flagged;
+	}
     
 }
