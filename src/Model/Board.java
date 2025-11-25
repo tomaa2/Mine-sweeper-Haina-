@@ -18,9 +18,10 @@ public class Board {
 	
 	//
 	private void initializeCells() {
-		for(int i=0; i<rows; i++) {
-			for(int j=0; j<columns; j++) {
-				grid[i][j]= new Cell(i,j);
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				grid[i][j] = new Cell(i, j);
+				// Cell constructor now sets cellType to EMPTY by default
 			}
 		}
 	}
@@ -75,31 +76,52 @@ public class Board {
 	}
 	
 	
-	//revealing all the empty neighbors of an empty cell when revealed!
+	// revealing all connected empty cells when an empty cell is revealed (cascade)
 	public void floodReveal(int row, int col) {
-		if(grid[row][col].getCellType() != CellType.EMPTY) {
+		// boundary check
+		if (!isInBounds(row, col)) {
 			return;
 		}
-		for(int dr=-1; dr<=1; dr++) {
-			for(int dc=-1; dc<=1; dc++) {
+		Cell cell = grid[row][col];
+		
+		// stop if already revealed or flagged
+		if (cell.isRevealed() || cell.isFlagged()) {
+			return;
+		}
+		// reveal the current cell
+		cell.setRevealed(true);
+
+		// only continue flood if cell is truly empty (no adjacent mines)
+		// NUMBER cells stop the cascade but are revealed
+		// MINE, QUESTION, SURPRISE cells also stop cascade
+		if (cell.getCellType() != CellType.EMPTY) {
+			return;
+		}
+
+		// recursively reveal all 8 neighbors
+		for (int dr = -1; dr <= 1; dr++) {
+			for (int dc = -1; dc <= 1; dc++) {
+				if (dr == 0 && dc == 0) {
+					continue; // skip the center cell
+				}
 				int newRow = row + dr;
 				int newCol = col + dc;
-				
-				if(!isInBounds(newRow, newCol))
-					continue;
-				
-				Cell neighbor = grid[newRow][newCol];
-				if(!neighbor.isRevealed() && !neighbor.isFlagged()) {
-					neighbor.setRevealed(true);
+
+				if (isInBounds(newRow, newCol)) {
+					Cell neighbor = grid[newRow][newCol];
 					
-					if (neighbor.getCellType() == CellType.EMPTY) {
-	                    floodReveal(newRow, newCol);
-	                }
+					// reveal neighbor if not already revealed and not flagged
+					if (!neighbor.isRevealed() && !neighbor.isFlagged()) {
+						// if neighbor is empty or number, continue flood
+						if (neighbor.getCellType() == CellType.EMPTY || 
+							neighbor.getCellType() == CellType.NUMBER) {
+							floodReveal(newRow, newCol);
+						}
+					}
 				}
 			}
-		}	
+		}
 	}
-	
 	private boolean isInBounds(int row, int col) {
 	    return row >= 0 && row < rows && col >= 0 && col < columns;
 	}

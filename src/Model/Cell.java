@@ -20,6 +20,8 @@ public class Cell {
     	this.isRevealed=false;
     	this.isUsed=false;
     	this.flagged=false;
+		this.cellType = CellType.EMPTY;  // default to empty
+
     }
 
 
