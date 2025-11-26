@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -12,6 +13,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+
+import Model.GameConfig;
 
 public class GameSetupController {
 
@@ -51,19 +54,13 @@ public class GameSetupController {
     private Button helpButton;
 
     // ----- Internal state -----
-
-    private enum Difficulty {
-        EASY, MEDIUM, HARD
-    }
-
-    private Difficulty currentDifficulty = Difficulty.EASY;
-
+    private GameConfig currentConfig = GameConfig.EASY;
     // ----- Initialization -----
 
     @FXML
     private void initialize() {
         // Default difficulty when screen opens
-        setDifficulty(Difficulty.EASY);
+    	setDifficulty(GameConfig.EASY);
 
         // Make "Back to Menu" label clickable
         backToMenuLabel.setOnMouseClicked(this::handleBackToMenu);
@@ -81,17 +78,17 @@ public class GameSetupController {
 
     @FXML
     private void selectEasy() {
-        setDifficulty(Difficulty.EASY);
+        setDifficulty(GameConfig.EASY);
     }
 
     @FXML
     private void selectMedium() {
-        setDifficulty(Difficulty.MEDIUM);
+        setDifficulty(GameConfig.MEDIUM);
     }
 
     @FXML
     private void selectHard() {
-        setDifficulty(Difficulty.HARD);
+        setDifficulty(GameConfig.HARD);
     }
 
     // ----- Navigation handlers -----
@@ -101,18 +98,65 @@ public class GameSetupController {
     }
 
     private void handleStartGame(Node source) {
-        // TODO: here you can pass player names & difficulty to the game logic
-        // For now we just navigate to the game screen.
-        switchScene(source, "/View/gamescreen.fxml");
+        String player1Name = player1Field.getText().trim();
+        String player2Name = player2Field.getText().trim();
+
+        // validate player 1
+        if (player1Name.isEmpty()) {
+            showAlert("Missing Name", "Please enter a name for Player 1.");
+            player1Field.requestFocus();
+            return;
+        }
+
+        // validate player 2
+        if (player2Name.isEmpty()) {
+            showAlert("Missing Name", "Please enter a name for Player 2.");
+            player2Field.requestFocus();
+            return;
+        }
+
+        // check if same names
+        if (player1Name.equalsIgnoreCase(player2Name)) {
+            showAlert("Same Names", "Players must have different names.");
+            player2Field.requestFocus();
+            return;
+        }
+
+        // start the game
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/gamescreen.fxml"));
+            
+            GameController gameController = new GameController(player1Name, player2Name, currentConfig);
+            GameScreenController screenController = new GameScreenController(gameController);
+            loader.setController(screenController);
+            
+            Parent root = loader.load();
+            screenController.initializeAfterLoad();
+
+            Stage stage = (Stage) source.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load game screen.");
+        }
+    }
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     // ----- Core logic -----
 
-    private void setDifficulty(Difficulty difficulty) {
-        this.currentDifficulty = difficulty;
+    private void setDifficulty(GameConfig config) {
+        this.currentConfig = config;
 
         // Update rules text
-        switch (difficulty) {
+        switch (config) {
             case EASY -> {
                 rulesTitleLabel.setText("Game Rules – Easy:");
                 rulesBodyLabel.setText(
@@ -141,21 +185,17 @@ public class GameSetupController {
                 );
             }
         }
-
-        // Optional: you can also visually highlight the selected button
         updateDifficultyButtonStyles();
     }
 
     private void updateDifficultyButtonStyles() {
-        // Simple style toggle – you can replace with your own CSS later
         String selectedStyle = "-fx-background-color: #cce4ff;";
-        String normalStyle   = "";
+        String normalStyle = "";
 
-        easyButton.setStyle(currentDifficulty == Difficulty.EASY ? selectedStyle : normalStyle);
-        mediumButton.setStyle(currentDifficulty == Difficulty.MEDIUM ? selectedStyle : normalStyle);
-        hardButton.setStyle(currentDifficulty == Difficulty.HARD ? selectedStyle : normalStyle);
+        easyButton.setStyle(currentConfig == GameConfig.EASY ? selectedStyle : normalStyle);
+        mediumButton.setStyle(currentConfig == GameConfig.MEDIUM ? selectedStyle : normalStyle);
+        hardButton.setStyle(currentConfig == GameConfig.HARD ? selectedStyle : normalStyle);
     }
-
     // ----- Utility: scene switching -----
 
     private void switchScene(Node source, String fxmlPath) {

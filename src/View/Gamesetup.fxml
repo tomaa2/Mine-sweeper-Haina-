@@ -77,7 +77,7 @@
                                             <children>
                                                 <ImageView fitHeight="46.0" fitWidth="45.0" preserveRatio="true">
                                                     <image>
-                                                        <Image url="@../../Downloads/two-businessmen-salutation.png" />
+                                                        <Image url="@iconss/two-businessmen-salutation.png" />
                                                     </image>
                                                 </ImageView>
 
