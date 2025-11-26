@@ -8,7 +8,6 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="Controller.GameController"
             prefWidth="1200.0" prefHeight="700.0">
 
     <children>
