@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HelpController">
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.HelpController">
 
     <children>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -23,11 +23,13 @@
                     </padding>
                     <children>
                         <!-- Back to previous screen -->
-                        <Label fx:id="backLabel" text="← Back">
-                            <font>
-                                <Font size="16.0" />
-                            </font>
-                        </Label>
+                        <Label fx:id="backLabel"
+                           text="← Back"
+                           onMouseClicked="#handleBack">
+    <font>
+        <Font size="16.0" />
+    </font>
+</Label>
 
                         <Region HBox.hgrow="ALWAYS" />
 
