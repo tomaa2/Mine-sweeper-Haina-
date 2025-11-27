@@ -553,6 +553,11 @@ public class GameController {
 		return game.getConfig();
 	}
 
+	public void handleCellClick(int playerIndex, int row, int col) {
+		// TODO Auto-generated method stub
+		
+	}
+
 //	public void startGame() {
 //		StartTime = LocalDateTime.now();
 //		boolean gameOver = false;
