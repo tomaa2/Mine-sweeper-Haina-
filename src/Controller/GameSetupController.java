@@ -131,7 +131,7 @@ public class GameSetupController {
             loader.setController(screenController);
             
             Parent root = loader.load();
-            screenController.initializeAfterLoad();
+            screenController.initializeAfterLoad(); 
 
             Stage stage = (Stage) source.getScene().getWindow();
             stage.setScene(new Scene(root));
