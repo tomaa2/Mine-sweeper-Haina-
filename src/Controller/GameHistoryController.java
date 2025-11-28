@@ -11,21 +11,37 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+/**
+ * Controller for the Game History screen.
+ * 
+ * Handles the "Back" label, which sends the user
+ * back to the main menu when clicked.
+ */
 public class GameHistoryController {
 
+    // Label that works like a Back button
     @FXML
-    private Label backLabel;   // מחובר ל-fx:id="backLabel" ב-FXML
+    private Label backLabel;
 
+    /**
+     * Called automatically when the screen loads.
+     * Sets the Back label to respond to mouse clicks.
+     */
     @FXML
     private void initialize() {
-        // להפוך את הלייבל ל"כפתור" – לחיצה תחזיר לתפריט הראשי
         backLabel.setOnMouseClicked(this::handleBackToMenu);
     }
 
+    /**
+     * Returns the user to the main menu screen.
+     */
     private void handleBackToMenu(MouseEvent event) {
         switchScene((Node) event.getSource(), "/View/MainWindow.fxml");
     }
 
+    /**
+     * Switches from the current screen to another FXML screen.
+     */
     private void switchScene(Node source, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

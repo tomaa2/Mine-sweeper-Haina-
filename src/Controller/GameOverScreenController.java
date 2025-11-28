@@ -29,7 +29,16 @@ public class GameOverScreenController {
     private int finalScore;
     private int remainingLives;
 
-    // נקרא מה-GameScreenController אחרי טעינת ה-FXML
+    /**
+     * Initializes all game-over data.
+     * Called from GameScreenController after the FXML is loaded.
+     *
+     * @param p1 Player 1 name
+     * @param p2 Player 2 name
+     * @param difficulty The selected difficulty level
+     * @param finalScore The final score achieved by the players
+     * @param remainingLives Number of lives left at the end of the game
+     */
     public void initData(String p1, String p2, String difficulty,
                          int finalScore, int remainingLives) {
 
@@ -42,39 +51,56 @@ public class GameOverScreenController {
         updateUI();
     }
 
+    /**
+     * Called automatically when FXML is loaded.
+     * Sets up the "Back to Menu" button action.
+     */
     @FXML
     private void initialize() {
         backToMenuButton.setOnAction(e -> handleBackToMenu((Node) e.getSource()));
     }
 
+    /**
+     * Updates all UI elements based on game results.
+     * Displays win/lose status, score, difficulty, players, and styling.
+     */
     private void updateUI() {
         boolean win = remainingLives > 0;
 
-        // כותרת לפי מצב
+        // Title based on result
         titleLabel.setText(win ? "YOU WIN 🏆" : "GAME OVER 💣");
 
-        // מלל
+        // Details
         playersLabel.setText("Players: " + player1Name + " & " + player2Name);
         difficultyLabel.setText("Difficulty: " + difficulty);
         scoreLabel.setText("Final Score: " + finalScore);
         livesLabel.setText("Remaining Lives: " + remainingLives);
 
-        // צבע רקע – אם תרצי הבדל בין WIN ל-LOSE
+        // Background color style
         if (win) {
             root.setStyle(
-                "-fx-background-color: linear-gradient(to bottom, #001331, #003366);"  // כחול ניצחון
+                "-fx-background-color: linear-gradient(to bottom, #001331, #003366);"  // Blue (victory)
             );
         } else {
             root.setStyle(
-                "-fx-background-color: linear-gradient(to bottom, #2b0000, #660000);"  // אדום הפסד
+                "-fx-background-color: linear-gradient(to bottom, #2b0000, #660000);"  // Red (defeat)
             );
         }
     }
 
+    /**
+     * Handles navigation back to the main menu.
+     */
     private void handleBackToMenu(Node source) {
         switchScene(source, "/View/MainWindow.fxml");
     }
 
+    /**
+     * Replaces the current scene with a new FXML view.
+     *
+     * @param source UI node used to retrieve the current stage
+     * @param fxmlPath Path to the target FXML file
+     */
     private void switchScene(Node source, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

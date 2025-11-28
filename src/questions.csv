@@ -1,1 +1,2 @@
-"ID","Question","Difficulty","A","B","C","D","Correct Answer"
+"ID","Question","GameDifficulty","QuestionDifficulty","A","B","C","D","Correct Answer"
+"1","w","Easy","EASY","w","w","w","w","w"

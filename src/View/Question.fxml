@@ -1,285 +1,219 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.QuestionController">
+<!--
+  Question Management Screen (Question Bank)
+  - Modern card-style layout with inline styles (no external CSS)
+  - Controller: Controller.QuestionController
+-->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="Controller.QuestionController"
+           style="-fx-background-color: linear-gradient(to bottom right, #1f2933, #111827);
+                  -fx-padding: 24;">
 
-    <children>
-        <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <!-- Main white card -->
+    <VBox spacing="18"
+          maxWidth="1000"
+          style="-fx-background-color: rgba(255,255,255,0.97);
+                 -fx-padding: 20 24 24 24;
+                 -fx-background-radius: 18;
+                 -fx-spacing: 18;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 18, 0.2, 0, 8);">
 
-            <!-- TOP BAR: back + title + add / import -->
-            <top>
-                <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
-                    <padding>
-                        <Insets bottom="10.0" left="40.0" right="40.0" top="20.0" />
-                    </padding>
-                    <children>
-                        <!-- Back to menu -->
-                        <Label fx:id="backLabel" text="← Back to Menu">
-                            <font>
-                                <Font size="16.0" />
-                            </font>
-                        </Label>
+        <!-- ===== Top Bar: Back + Title + Add ===== -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Button fx:id="backToMenuButton"
+                    text="← Back to Menu"
+                    onAction="#handleBackToMenu"
+                    style="-fx-background-color: transparent;
+                           -fx-border-color: #d1d5db;
+                           -fx-border-radius: 8;
+                           -fx-padding: 5 12;
+                           -fx-text-fill: #374151;
+                           -fx-font-size: 12px;"/>
 
-                        <Region HBox.hgrow="ALWAYS" />
-                  <ImageView fitHeight="51.0" fitWidth="53.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../../../../Downloads/question-and-answer.png" />
-                     </image>
-                  </ImageView>
+            <Label text="Question Bank"
+                   style="-fx-font-size: 24px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #111827;"/>
 
-                        <!-- Page title -->
-                        <Label text="Question Bank">
-                            <font>
-                                <Font size="28.0" />
-                            </font>
-                        </Label>
+            <!-- Spacer -->
+            <Region HBox.hgrow="ALWAYS"/>
 
-                        <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="addQuestionButton"
+                    text="+ Add Question"
+                    onAction="#handleAddQuestion"
+                    style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+                           -fx-text-fill: white;
+                           -fx-font-weight: bold;
+                           -fx-padding: 6 16;
+                           -fx-background-radius: 9;
+                           -fx-font-size: 13px;"/>
+        </HBox>
 
-                        <!-- Buttons on the right: Add & Import/Export -->
-                        <HBox alignment="CENTER_RIGHT" spacing="8.0">
-                            <children>
-                                <Button fx:id="importButton" mnemonicParsing="false" text="Import" />
-                                <Button fx:id="exportButton" mnemonicParsing="false" text="Export" />
-                                <Button fx:id="addQuestionButton" mnemonicParsing="false" text="Add Question" />
-                            </children>
-                        </HBox>
-                    </children>
-                </HBox>
-            </top>
+        <!-- ===== Counters ===== -->
+        <HBox spacing="10">
+            <HBox spacing="10" alignment="CENTER_LEFT">
 
-            <!-- CENTER: summary + filters + question list -->
-            <center>
-                <VBox spacing="20.0" BorderPane.alignment="CENTER">
-                    <padding>
-                        <Insets bottom="30.0" left="40.0" right="40.0" top="10.0" />
-                    </padding>
-                    <children>
-
-                        <!-- SUMMARY CARDS -->
-                        <HBox alignment="CENTER_LEFT" spacing="20.0">
-                            <children>
-
-                                <!-- Total questions -->
-                                <VBox prefHeight="86.0" prefWidth="383.0" spacing="6.0">
-                                    <padding>
-                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-                                    </padding>
-                                    <children>
-                                        <Label fx:id="totalQuestionsLabel" text="0">
-                                            <font>
-                                                <Font size="22.0" />
-                                            </font>
-                                        </Label>
-                                        <Label text="Total Questions">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </VBox>
-
-                                <!-- Easy count -->
-                                <VBox prefHeight="86.0" prefWidth="369.0" spacing="6.0">
-                                    <padding>
-                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-                                    </padding>
-                                    <children>
-                                        <Label fx:id="easyCountLabel" text="0">
-                                            <font>
-                                                <Font size="22.0" />
-                                            </font>
-                                        </Label>
-                                        <Label text="Easy">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </VBox>
-
-                                <!-- Medium count -->
-                                <VBox prefHeight="86.0" prefWidth="376.0" spacing="6.0">
-                                    <padding>
-                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-                                    </padding>
-                                    <children>
-                                        <Label fx:id="mediumCountLabel" text="0">
-                                            <font>
-                                                <Font size="22.0" />
-                                            </font>
-                                        </Label>
-                                        <Label text="Medium">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </VBox>
-
-                                <!-- Hard count -->
-                                <VBox prefHeight="86.0" prefWidth="360.0" spacing="6.0">
-                                    <padding>
-                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-                                    </padding>
-                                    <children>
-                                        <Label fx:id="hardCountLabel" text="0">
-                                            <font>
-                                                <Font size="22.0" />
-                                            </font>
-                                        </Label>
-                                        <Label text="Hard">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </VBox>
-
-                                <!-- Expert count -->
-                                <VBox prefHeight="86.0" prefWidth="360.0" spacing="6.0">
-                                    <padding>
-                                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
-                                    </padding>
-                                    <children>
-                                        <Label fx:id="expertCountLabel" text="0">
-                                            <font>
-                                                <Font size="22.0" />
-                                            </font>
-                                        </Label>
-                                        <Label text="Expert">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                </VBox>
-                                
-
-                            </children>
-                        </HBox>
-
-                        <!-- FILTERS BAR -->
-                        <VBox spacing="6.0">
-                            <children>
-                                <Label text="Filters">
-                                    <font>
-                                        <Font size="16.0" />
-                                    </font>
-                                </Label>
-
-                                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                    <children>
-                                        <!-- Search text -->
-                                        <TextField fx:id="searchField" maxWidth="1.7976931348623157E308" prefWidth="260.0" promptText="Search by question text..." HBox.hgrow="ALWAYS" />
-
-                                        <!-- Category filter -->
-                                        <ComboBox fx:id="categoryCombo" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="176.0" promptText="Category" HBox.hgrow="ALWAYS" />
-
-                                        <!-- Difficulty filter -->
-                                        <ComboBox fx:id="difficultyCombo" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="155.0" promptText="Difficulty" HBox.hgrow="ALWAYS" />
-
-                                        <!-- Level filter (if you have levels inside difficulty) -->
-                                        <ComboBox fx:id="levelCombo" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="163.0" promptText="Level" HBox.hgrow="ALWAYS" />
-
-                                        <Region HBox.hgrow="ALWAYS" />
-
-                                        <!-- Clear filters button -->
-                                        <Button fx:id="clearFiltersButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="101.0" text="Clear Filters" HBox.hgrow="ALWAYS" />
-                                    </children>
-                                </HBox>
-                            </children>
-                        </VBox>
-
-                        <!-- QUESTION LIST TITLE -->
-                        <Label text="Questions">
-                            <font>
-                                <Font size="16.0" />
-                            </font>
-                        </Label>
-
-                        <!-- QUESTION LIST -->
-                        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-                            <content>
-                                <VBox fx:id="questionListContainer" spacing="8.0">
-                                    <padding>
-                                        <Insets bottom="8.0" left="0.0" right="0.0" top="8.0" />
-                                    </padding>
-
-                                    <!-- SAMPLE ROW (template for code) -->
-                                    <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="10.0">
-                                        <padding>
-                                            <Insets bottom="10.0" left="16.0" right="16.0" top="10.0" />
-                                        </padding>
-                                        <children>
-                                            <!-- Left column: difficulty + category -->
-                                            <VBox prefWidth="120.0" spacing="2.0">
-                                                <children>
-                                                    <Label text="Easy">
-                                                        <font>
-                                                            <Font size="13.0" />
-                                                        </font>
-                                                    </Label>
-                                                    <Label text="Category: General">
-                                                        <font>
-                                                            <Font size="11.0" />
-                                                        </font>
-                                                    </Label>
-                                                </children>
-                                            </VBox>
-
-                                            <!-- Middle: question text -->
-                                            <VBox spacing="2.0">
-                                                <children>
-                                                    <Label text="What is the most difficult course" wrapText="true">
-                                                        <font>
-                                                            <Font size="13.0" />
-                                                        </font>
-                                                    </Label>
-                                                    <Label text="Correct answer: Software engineering" wrapText="true">
-                                                        <font>
-                                                            <Font size="11.0" />
-                                                        </font>
-                                                    </Label>
-                                                </children>
-                                            </VBox>
-
-                                            <!-- Spacer -->
-                                            <Region HBox.hgrow="ALWAYS" />
-
-                                            <!-- Right: actions -->
-                                            <HBox alignment="CENTER_RIGHT" spacing="6.0">
-                                                <children>
-                                                    <Button mnemonicParsing="false" prefWidth="60.0" text="View" />
-                                                    <Button mnemonicParsing="false" prefWidth="60.0" text="Edit" />
-                                                    <Button mnemonicParsing="false" prefWidth="60.0" text="Delete" />
-                                                </children>
-                                            </HBox>
-                                        </children>
-                                    </HBox>
-
-                                </VBox>
-                            </content>
-                        </ScrollPane>
-
-                    </children>
+                <VBox spacing="4"
+                      style="-fx-background-color: #f9fafb;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                             -fx-padding: 8 12;">
+                    <Label text="Total Questions"
+                           style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                    <Label fx:id="totalQuestionsValueLabel"
+                           text="0"
+                           style="-fx-font-size: 18px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #111827;"/>
                 </VBox>
-            </center>
 
-        </BorderPane>
-    </children>
-</AnchorPane>
+                <VBox spacing="4"
+                      style="-fx-background-color: #f9fafb;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                             -fx-padding: 8 12;">
+                    <Label text="Easy"
+                           style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                    <Label fx:id="easyQuestionsValueLabel"
+                           text="0"
+                           style="-fx-font-size: 16px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #16a34a;"/>
+                </VBox>
+
+                <VBox spacing="4"
+                      style="-fx-background-color: #f9fafb;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                             -fx-padding: 8 12;">
+                    <Label text="Medium"
+                           style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                    <Label fx:id="mediumQuestionsValueLabel"
+                           text="0"
+                           style="-fx-font-size: 16px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #2563eb;"/>
+                </VBox>
+
+                <VBox spacing="4"
+                      style="-fx-background-color: #f9fafb;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                             -fx-padding: 8 12;">
+                    <Label text="Hard"
+                           style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                    <Label fx:id="hardQuestionsValueLabel"
+                           text="0"
+                           style="-fx-font-size: 16px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #ea580c;"/>
+                </VBox>
+
+                <VBox spacing="4"
+                      style="-fx-background-color: #f9fafb;
+                             -fx-background-radius: 10;
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                             -fx-padding: 8 12;">
+                    <Label text="Expert"
+                           style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                    <Label fx:id="expertQuestionsValueLabel"
+                           text="0"
+                           style="-fx-font-size: 16px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #7c3aed;"/>
+                </VBox>
+
+            </HBox>
+        </HBox>
+
+        <!-- ===== Filters ===== -->
+        <VBox spacing="6">
+            <Label text="Filters"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #4b5563;"/>
+
+            <HBox spacing="10">
+                <TextField fx:id="searchField"
+                           promptText="Search by question text..."
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-background-color: #f9fafb;
+                                  -fx-background-radius: 8;
+                                  -fx-padding: 6 10;
+                                  -fx-border-color: #e5e7eb;
+                                  -fx-border-radius: 8;
+                                  -fx-font-size: 12px;"/>
+
+                <ComboBox fx:id="categoryFilterCombo"
+                          promptText="Category"
+                          prefWidth="160"
+                          style="-fx-background-radius: 8;
+                                 -fx-border-radius: 8;
+                                 -fx-border-color: #e5e7eb;
+                                 -fx-padding: 2 6;"/>
+                                 
+                 <ComboBox fx:id="GameFilterCombo"
+                          promptText="Gdifficulty"
+                          prefWidth="180"
+                          style="-fx-background-radius: 9;
+                                 -fx-border-radius: 9;
+                                 -fx-border-color: #e5e7eb;
+                                 -fx-padding: 2 6;"/>
+
+                <ComboBox fx:id="difficultyFilterCombo"
+                          promptText="Difficulty"
+                          prefWidth="180"
+                          style="-fx-background-radius: 8;
+                                 -fx-border-radius: 8;
+                                 -fx-border-color: #e5e7eb;
+                                 -fx-padding: 2 6;"/>
+
+
+                <Button text="Clear"
+                        onAction="#handleClearFilters"
+                        style="-fx-background-color: transparent;
+                               -fx-border-color: #d1d5db;
+                               -fx-border-radius: 8;
+                               -fx-padding: 5 12;
+                               -fx-text-fill: #374151;
+                               -fx-font-size: 12px;"/>
+            </HBox>
+        </VBox>
+
+        <!-- ===== Questions Table ===== -->
+        <TableView fx:id="questionsTable"
+                   prefHeight="420"
+                   VBox.vgrow="ALWAYS"
+                   style="-fx-background-color: #f9fafb;
+                          -fx-border-color: #e5e7eb;
+                          -fx-border-radius: 10;
+                          -fx-background-radius: 10;">
+            <columns>
+                <TableColumn fx:id="difficultyColumn"
+                             text="Difficulty" prefWidth="100"/>
+
+                <TableColumn fx:id="questionTextColumn"
+                             text="Question" prefWidth="420"/>
+
+                <TableColumn fx:id="correctAnswerColumn"
+                             text="Correct Answer" prefWidth="160"/>
+
+                <TableColumn fx:id="actionsColumn"
+                             text="Actions" prefWidth="120"/>
+            </columns>
+        </TableView>
+
+    </VBox>
+
+</StackPane>

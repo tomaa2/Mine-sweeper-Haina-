@@ -1,185 +1,689 @@
 package Controller;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.Writer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import Model.Question;
 import Model.SysData;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
+/**
+ * QuestionController
+ *
+ * This class has a dual role:
+ *  1) Manages loading and saving questions from/to a CSV file.
+ *  2) Serves as the JavaFX controller for the Question.fxml screen
+ *     (Question Bank UI: view, filter, add, edit, delete questions).
+ *
+ * It expects:
+ *  - Model.Question with fields: question text, answers (List<String> of size 4),
+ *    correct answer (String), gameDifficulty and questionDifficulty.
+ *  - Model.SysData as a singleton that holds the list of questions and provides
+ *    addQuestion, editQuestion, deleteQuestion, getQuestions, setQuestions methods.
+ */
 public class QuestionController {
-	private String csvFilePath;
-	
-	public QuestionController() {
-		this.csvFilePath = "src/questions.csv";
-	}
-	
-	//load the questions from the questions file into the (SysData.questions)
-	public void loadQuestion(String filePath) {
-		this.csvFilePath = filePath;
-		List<Question> loadedQuestions = new ArrayList<>();
-		
-		try(CSVReader reader = new CSVReader(new FileReader(filePath))) {
-			String[] line;
-			reader.readNext(); //skip header row
-			
-			while((line = reader.readNext()) != null) {
-				String questionText = line[1];
-	            String difficulty    = line[2];
-	            List<String> answers = new ArrayList<>();
-	            answers.add(line[3]); // A
-	            answers.add(line[4]); // B
-	            answers.add(line[5]); // C
-	            answers.add(line[6]); // D
 
-	            String correctAnswer = line[7]; //correct answer
-	            
-	            Question q = new Question (questionText, answers, correctAnswer, difficulty);
-	            loadedQuestions.add(q);
-			}
-			
+    // ===== CSV file path =====
+    private String csvFilePath;
+
+    // ===== Top bar elements (injected from FXML) =====
+    @FXML private Button backToMenuButton;
+    @FXML private Button addQuestionButton;
+
+    // ===== Counters (injected from FXML) =====
+    @FXML private Label totalQuestionsValueLabel;
+    @FXML private Label easyQuestionsValueLabel;
+    @FXML private Label mediumQuestionsValueLabel;
+    @FXML private Label hardQuestionsValueLabel;
+    @FXML private Label expertQuestionsValueLabel;
+
+    // ===== Filters (injected from FXML) =====
+    @FXML private TextField  searchField;
+    @FXML private ComboBox<String> categoryFilterCombo;
+    @FXML private ComboBox<String> difficultyFilterCombo; // Question difficulty
+    @FXML private ComboBox<String> GameFilterCombo;       // Game difficulty
+
+    // ===== Table (injected from FXML) =====
+    @FXML private TableView<Question> questionsTable;
+    @FXML private TableColumn<Question, String> difficultyColumn;      // question difficulty
+    @FXML private TableColumn<Question, String> questionTextColumn;
+    @FXML private TableColumn<Question, String> correctAnswerColumn;
+    @FXML private TableColumn<Question, Void>   actionsColumn;
+
+    // ===== In-memory data structures =====
+    private final ObservableList<Question> masterData = FXCollections.observableArrayList();
+    private FilteredList<Question> filteredData;
+
+    /**
+     * Default constructor.
+     * Sets the default CSV file path.
+     */
+    public QuestionController() {
+        this.csvFilePath = "src/questions.csv";
+    }
+    /**
+     * Called automatically by JavaFX after the FXML is loaded.
+     * Initializes the Question Bank screen: loads questions, configures table,
+     * sets up filters and counters.
+     */
+    @FXML
+    private void initialize() {
+        // 0. Populate filter combo boxes
+        if (difficultyFilterCombo != null) {
+            difficultyFilterCombo.getItems().setAll(
+                    "All Question Difficulties", "EASY", "MEDIUM", "HARD", "EXPERT"
+            );
+            difficultyFilterCombo.getSelectionModel().select("All Question Difficulties");
+        }
+
+        if (categoryFilterCombo != null) {
+            categoryFilterCombo.getItems().setAll(
+                    "All Categories", "General"
+            );
+            categoryFilterCombo.getSelectionModel().select("All Categories");
+        }
+
+        if (GameFilterCombo != null) {
+            GameFilterCombo.getItems().setAll(
+                    "All Game Difficulties", "Easy", "Medium", "Hard"
+            );
+            GameFilterCombo.getSelectionModel().select("All Game Difficulties");
+        }
+
+        // 1. Load questions from CSV into SysData + masterData (only if empty)
+        if (SysData.getInstance().getQuestions() == null
+                || SysData.getInstance().getQuestions().isEmpty()) {
+            loadQuestions(csvFilePath);
+        } else {
+            masterData.setAll(SysData.getInstance().getQuestions());
+        }
+
+       // System.out.println("MasterData size after init = " + masterData.size());
+
+        // 2. Configure table columns
+        if (difficultyColumn != null) {
+            // show question difficulty (EASY / MEDIUM / HARD / EXPERT)
+            difficultyColumn.setCellValueFactory(cellData ->
+                    new SimpleStringProperty(cellData.getValue().getQuestionDifficulty())
+            );
+        }
+
+        if (questionTextColumn != null) {
+            questionTextColumn.setCellValueFactory(cellData ->
+                    new SimpleStringProperty(cellData.getValue().getQuestion())
+            );
+        }
+
+        if (correctAnswerColumn != null) {
+            correctAnswerColumn.setCellValueFactory(cellData ->
+                    new SimpleStringProperty(cellData.getValue().getCorrectAnswer())
+            );
+        }
+
+        // 3. Wrap data in FilteredList and SortedList
+        filteredData = new FilteredList<>(masterData, q -> true);
+        SortedList<Question> sortedData = new SortedList<>(filteredData);
+        if (questionsTable != null) {
+            sortedData.comparatorProperty().bind(questionsTable.comparatorProperty());
+            questionsTable.setItems(sortedData);
+        }
+
+        // 4. Setup actions column (edit/delete buttons per row)
+        if (actionsColumn != null) {
+            setupActionsColumn();
+        }
+
+        // 5. Listeners for filters
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (difficultyFilterCombo != null) {
+            difficultyFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+        if (GameFilterCombo != null) {
+            GameFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+
+        // 6. Initial counters
+        updateCounters();
+    }
+
+
+    /**
+     * Creates the "Actions" column (edit & delete buttons for each question row).
+     */
+    private void setupActionsColumn() {
+        actionsColumn.setCellFactory(col -> new TableCell<>() {
+
+            private final Button editButton   = new Button("✏");
+            private final Button deleteButton = new Button("🗑");
+            private final HBox   container    = new HBox(8, editButton, deleteButton);
+
+            {
+                container.setAlignment(Pos.CENTER);
+
+                // Simple inline styling for action buttons
+                editButton.setStyle("-fx-background-color: #e0f2fe; " +
+                        "-fx-text-fill: #1d4ed8; " +
+                        "-fx-background-radius: 6; " +
+                        "-fx-font-size: 11px; " +
+                        "-fx-padding: 3 7;");
+                deleteButton.setStyle("-fx-background-color: #fee2e2; " +
+                        "-fx-text-fill: #b91c1c; " +
+                        "-fx-background-radius: 6; " +
+                        "-fx-font-size: 11px; " +
+                        "-fx-padding: 3 7;");
+
+                editButton.setOnAction(e -> {
+                    Question question = getTableView().getItems().get(getIndex());
+                    handleEditQuestion(question);
+                });
+
+                deleteButton.setOnAction(e -> {
+                    Question question = getTableView().getItems().get(getIndex());
+                    handleDeleteQuestion(question);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(container);
+                }
+            }
+        });
+    }
+
+    /**
+     * Loads questions from a CSV file into SysData.
+     */
+    public void loadQuestions(String filePath) {
+        this.csvFilePath = filePath;
+        List<Question> loadedQuestions = new ArrayList<>();
+
+        try {
+            File f = new File(filePath);
+            if (!f.exists()) {
+                System.out.println("CSV file not found, no questions loaded.");
+                return;
+            }
+
+            try (CSVReader reader = new CSVReader(new FileReader(f))) {
+                String[] line;
+                // skip header row
+                reader.readNext();
+
+                while ((line = reader.readNext()) != null) {
+                    System.out.println("CSV LINE: " + Arrays.toString(line));
+
+                    String questionText;
+                    String gameDifficulty;
+                    String questionDifficulty;
+                    List<String> answers = new ArrayList<>();
+                    String correctAnswer;
+
+                    if (line.length >= 9) {
+                        // New format with game difficulty
+                        questionText       = line[1];
+                        gameDifficulty     = line[2];
+                        questionDifficulty = line[3];
+
+                        answers.add(line[4]);
+                        answers.add(line[5]);
+                        answers.add(line[6]);
+                        answers.add(line[7]);
+
+                        correctAnswer = line[8];
+                    } else if (line.length >= 8) {
+                        // Old format – assume gameDifficulty = "Easy"
+                        questionText       = line[1];
+                        gameDifficulty     = "Easy";
+                        questionDifficulty = line[2];
+
+                        answers.add(line[3]);
+                        answers.add(line[4]);
+                        answers.add(line[5]);
+                        answers.add(line[6]);
+
+                        correctAnswer = line[7];
+                    } else {
+                        System.out.println("Skipping line, not enough columns.");
+                        continue;
+                    }
+
+                    Question q = new Question(
+                            questionText,
+                            answers,
+                            correctAnswer,
+                            gameDifficulty,
+                            questionDifficulty
+                    );
+                    loadedQuestions.add(q);
+                }
+            }
+
             SysData.getInstance().setQuestions(loadedQuestions);
-            System.out.println("The Questions Loaded Successfully!");
-		}catch(Exception e) {
-			e.printStackTrace();
-			System.out.println("Failed to load the questions!" + e.getMessage());
-		}
-	}
-	
-	//saves the questions from the system (the game) into the file (questions.csv)
-	public void saveQuestions() {
-		String filePath = this.csvFilePath;
-		List<Question> questions = SysData.getInstance().getQuestions();
-		
-		try(CSVWriter writer = new CSVWriter(new FileWriter(filePath))){
-			writer.writeNext(new String[]{
-		            "ID", "Question", "Difficulty",
-		            "A", "B", "C", "D", "Correct Answer"
-		        });
-			int id = 1;
-			
-			for(Question q: questions) {
-				writer.writeNext(new String[] {
-		                String.valueOf(id++),
-		                q.getQuestion(),
-		                q.getDifficulty(),
-		                q.getAnswers().get(0),
-		                q.getAnswers().get(1),
-		                q.getAnswers().get(2),
-		                q.getAnswers().get(3),
-		                q.getCorrectAnswer()
-				});
-			}
-				
-			System.out.println("The Questions Saved Successfully!");
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-			System.out.println("Failed to save the questions!" + e.getMessage());
-		}
-	}
-	//
-	//the loadQuestions method and the saveQuestions, each one does the opposite operation
-	//of the second. loadQuestions gets the question from "Questions.csv" file into the system
-	//saveQuestions take the questions from the system and saves them into the "Questions.csv" file.
-	//
-	
-	//to display the questions into the question bank interface
-	public void displayQuestions() {
-		List<Question> questions = SysData.getInstance().getQuestions();
-		if(questions.isEmpty()) {
-			System.out.println("No questions available.");
-		}else {
-			questions.forEach(System.out::println);
-		}
-	}
-	
-	public void addQuestion(Scanner scanner) {
-		System.out.println("Enter The Question");
-		String questText = scanner.nextLine().trim();
-		if(questText.isEmpty()) {
-			 System.out.println("Question text cannot be empty.");
-	            return;
-		}
-		
-		System.out.println("Enter Answers (comma-separted):");
-		List<String> answers = Arrays.asList(scanner.nextLine().split(","));
-		if (answers.isEmpty() || answers.size() < 4) {
-            System.out.println("There must be 4 answers answers.");
-            return;
-        }
-		
-		System.out.println("Enter the correct Answer:");
-		String correctAnswer = scanner.nextLine().trim();
-        if (!answers.contains(correctAnswer)) {
-            System.out.println("The correct answer must be one of the provided answers.");
-            return;
-        }
-        
-        System.out.print("Enter difficulty (Easy(1), Medium(2), Hard(3), Expert(4): ");
-        String difficulty = scanner.nextLine().trim().toUpperCase();
-        if (!Arrays.asList("1", "2", "3", "4").contains(difficulty)) { // Replace List.of with Arrays.asList
-            System.out.println("Invalid difficulty level.");
-            return;
-        }
-        
-        Question newQues = new Question (questText, answers, correctAnswer, difficulty);
-        
-        if (SysData.getInstance().addQuestion(newQues)) {
-            System.out.println("Question added successfully!");
-        } else {
-            System.out.println("Failed to add question (duplicate or invalid).");
-        }   
-	}
-	
-	//to edit any existing question
-	public void editQuestion(Scanner scanner) {
-		 System.out.print("Enter the text of the question to edit: ");
-	        String oldQuestionText = scanner.nextLine().trim();
+            masterData.setAll(loadedQuestions);
+            System.out.println("Questions loaded successfully from CSV.");
 
-	        if (SysData.getInstance().getQuestions().stream().noneMatch(q -> q.getQuestion().equalsIgnoreCase(oldQuestionText))) {
-	            System.out.println("Question not found.");
-	            return;
-	        }
-
-	        System.out.print("Enter new question text: ");
-	        String newQuestionText = scanner.nextLine().trim();
-
-	        System.out.print("Enter new answers (comma-separated): ");
-	        List<String> newAnswers = Arrays.asList(scanner.nextLine().split(","));
-
-	        System.out.print("Enter new correct answer: ");
-	        String newCorrectAnswer = scanner.nextLine().trim();
-
-	        System.out.print("Enter new difficulty (Easy, Medium, Hard): ");
-	        String newDifficulty = scanner.nextLine().trim().toUpperCase();
-
-	        Question updatedQuestion = new Question(newQuestionText, newAnswers, newCorrectAnswer, newDifficulty);
-
-	        if (SysData.getInstance().editQuestion(oldQuestionText, updatedQuestion)) {
-	            System.out.println("Question updated successfully!");
-	        } else {
-	            System.out.println("Failed to update question (invalid data).");
-	        }
-	}
-	
-	//to delete any one of the questions
-	public void deleteQuestion(Scanner scanner) {
-        System.out.print("Enter the text of the question to delete: ");
-        String questionText = scanner.nextLine().trim();
-
-        if (SysData.getInstance().deleteQuestion(questionText)) {
-            System.out.println("Question deleted successfully!");
-        } else {
-            System.out.println("Question not found.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to load questions: ");
         }
     }
-	
+
+    /**
+     * Saves the current questions from SysData to the CSV file.
+     * Always uses the new 9-column format.
+     */
+    public void saveQuestions() {
+        String filePath = this.csvFilePath;
+        List<Question> questions = SysData.getInstance().getQuestions();
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+            // Header
+            writer.writeNext(new String[]{
+                    "ID", "Question", "GameDifficulty", "QuestionDifficulty",
+                    "A", "B", "C", "D", "Correct Answer"
+            });
+
+            int id = 1;
+            for (Question q : questions) {
+                writer.writeNext(new String[]{
+                        String.valueOf(id++),
+                        q.getQuestion(),
+                        q.getGameDifficulty(),
+                        q.getQuestionDifficulty(),
+                        q.getAnswers().get(0),
+                        q.getAnswers().get(1),
+                        q.getAnswers().get(2),
+                        q.getAnswers().get(3),
+                        q.getCorrectAnswer()
+                });
+            }
+
+            System.out.println("Questions saved successfully to CSV.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to save questions: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Applies search, question difficulty and game difficulty filters
+     * over the question list.
+     */
+    private void applyFilters() {
+        String searchText = (searchField != null) ? searchField.getText() : "";
+
+        String questionDiffFilter = (difficultyFilterCombo != null)
+                ? difficultyFilterCombo.getValue()
+                : "All Question Difficulties";
+
+        String gameDiffFilter = (GameFilterCombo != null)
+                ? GameFilterCombo.getValue()
+                : "All Game Difficulties";
+
+        if (filteredData == null) {
+            return;
+        }
+
+        filteredData.setPredicate(q -> {
+            boolean matchesText = (searchText == null || searchText.isBlank())
+                    || q.getQuestion().toLowerCase().contains(searchText.toLowerCase());
+
+            boolean matchesQuestionDiff = (questionDiffFilter == null
+                    || questionDiffFilter.toLowerCase().startsWith("all"))
+                    || q.getQuestionDifficulty().equalsIgnoreCase(questionDiffFilter);
+
+            boolean matchesGameDiff = (gameDiffFilter == null
+                    || gameDiffFilter.toLowerCase().startsWith("all"))
+                    || q.getGameDifficulty().equalsIgnoreCase(gameDiffFilter);
+
+            return matchesText && matchesQuestionDiff && matchesGameDiff;
+        });
+
+        updateCounters();
+    }
+
+    /**
+     * Updates the difficulty counters at the top of the screen
+     * using the currently filtered data.
+     * (Counters are by question difficulty.)
+     */
+    private void updateCounters() {
+        if (filteredData == null) {
+            return;
+        }
+
+        int total = filteredData.size();
+
+        long easy   = filteredData.stream()
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("EASY")).count();
+        long medium = filteredData.stream()
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("MEDIUM")).count();
+        long hard   = filteredData.stream()
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("HARD")).count();
+        long expert = filteredData.stream()
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("EXPERT")).count();
+
+        if (totalQuestionsValueLabel != null) {
+            totalQuestionsValueLabel.setText(String.valueOf(total));
+        }
+        if (easyQuestionsValueLabel != null) {
+            easyQuestionsValueLabel.setText(String.valueOf(easy));
+        }
+        if (mediumQuestionsValueLabel != null) {
+            mediumQuestionsValueLabel.setText(String.valueOf(medium));
+        }
+        if (hardQuestionsValueLabel != null) {
+            hardQuestionsValueLabel.setText(String.valueOf(hard));
+        }
+        if (expertQuestionsValueLabel != null) {
+            expertQuestionsValueLabel.setText(String.valueOf(expert));
+        }
+    }
+
+    /**
+     * Clears all filters (search text, difficulties, category).
+     */
+    @FXML
+    private void handleClearFilters() {
+        if (searchField != null) {
+            searchField.clear();
+        }
+        if (difficultyFilterCombo != null) {
+            difficultyFilterCombo.getSelectionModel().select("All Question Difficulties");
+        }
+        if (categoryFilterCombo != null) {
+            categoryFilterCombo.getSelectionModel().select("All Categories");
+        }
+        if (GameFilterCombo != null) {
+            GameFilterCombo.getSelectionModel().select("All Game Difficulties");
+        }
+        applyFilters();
+    }
+
+    /**
+     * Handles the "Add Question" button.
+     * Opens a dialog to create a new question.
+     */
+    @FXML
+    private void handleAddQuestion() {
+        Question newQuestion = showQuestionDialog(null);
+        if (newQuestion != null) {
+            boolean added = SysData.getInstance().addQuestion(newQuestion);
+            if (added) {
+                masterData.add(newQuestion);
+                saveQuestions();
+                applyFilters();
+            } else {
+                showError("Failed to add question. It may already exist.");
+            }
+        }
+    }
+
+    /**
+     * Handles editing of an existing question (triggered from Actions column).
+     */
+    private void handleEditQuestion(Question question) {
+        if (question == null) {
+            return;
+        }
+
+        String oldQuestionText = question.getQuestion();
+
+        Question updated = showQuestionDialog(question);
+        if (updated != null) {
+            boolean success = SysData.getInstance().editQuestion(oldQuestionText, updated);
+            if (success) {
+                int index = masterData.indexOf(question);
+                if (index >= 0) {
+                    masterData.set(index, updated);
+                }
+                saveQuestions();
+                applyFilters();
+            } else {
+                showError("Failed to update question. Please check the data.");
+            }
+        }
+    }
+
+    /**
+     * Handles deletion of a question (triggered from Actions column).
+     */
+    private void handleDeleteQuestion(Question question) {
+        if (question == null) {
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Question");
+        alert.setHeaderText("Are you sure you want to delete this question?");
+        alert.setContentText(question.getQuestion());
+
+        alert.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+                boolean success = SysData.getInstance().deleteQuestion(question.getQuestion());
+                if (success) {
+                    masterData.remove(question);
+                    saveQuestions();
+                    applyFilters();
+                } else {
+                    showError("Failed to delete question. It may not exist.");
+                }
+            }
+        });
+    }
+
+    /**
+     * Handles navigation back to the main menu.
+     */
+    @FXML
+    private void handleBackToMenu() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MainWindow.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) backToMenuButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to navigate back to the main menu.\n" + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Displays a dialog for creating or editing a question.
+     *
+     * @param existingQuestion if null → create mode; otherwise edit mode.
+     * @return new Question if the user confirms with valid data, or null otherwise.
+     */
+    private Question showQuestionDialog(Question existingQuestion) {
+        boolean isEditMode = (existingQuestion != null);
+
+        Dialog<Question> dialog = new Dialog<>();
+        dialog.setTitle(isEditMode ? "Edit Question" : "Add Question");
+
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        // Form fields
+        TextField questionField      = new TextField();
+        TextField answerAField       = new TextField();
+        TextField answerBField       = new TextField();
+        TextField answerCField       = new TextField();
+        TextField answerDField       = new TextField();
+        TextField correctAnswerField = new TextField();
+
+        ComboBox<String> gameDifficultyCombo = new ComboBox<>();
+        gameDifficultyCombo.getItems().addAll("Easy", "Medium", "Hard");
+
+        ComboBox<String> questionDifficultyCombo = new ComboBox<>();
+        questionDifficultyCombo.getItems().addAll("EASY", "MEDIUM", "HARD", "EXPERT");
+
+        if (isEditMode) {
+            questionField.setText(existingQuestion.getQuestion());
+            if (existingQuestion.getAnswers() != null && existingQuestion.getAnswers().size() == 4) {
+                answerAField.setText(existingQuestion.getAnswers().get(0));
+                answerBField.setText(existingQuestion.getAnswers().get(1));
+                answerCField.setText(existingQuestion.getAnswers().get(2));
+                answerDField.setText(existingQuestion.getAnswers().get(3));
+            }
+
+            // Try to recover the correct letter (A/B/C/D) from the existing correct answer
+            String existingCorrect = existingQuestion.getCorrectAnswer();
+            String correctLetter = "";
+            if (existingCorrect != null) {
+                if (existingCorrect.equals(answerAField.getText())) correctLetter = "A";
+                else if (existingCorrect.equals(answerBField.getText())) correctLetter = "B";
+                else if (existingCorrect.equals(answerCField.getText())) correctLetter = "C";
+                else if (existingCorrect.equals(answerDField.getText())) correctLetter = "D";
+                else correctLetter = existingCorrect; // fallback
+            }
+            correctAnswerField.setText(correctLetter);
+
+            gameDifficultyCombo.getSelectionModel()
+                    .select(existingQuestion.getGameDifficulty());
+            questionDifficultyCombo.getSelectionModel()
+                    .select(existingQuestion.getQuestionDifficulty());
+
+        } else {
+            gameDifficultyCombo.getSelectionModel().select("Easy");
+            questionDifficultyCombo.getSelectionModel().select("EASY");
+        }
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(20, 10, 10, 10));
+
+        int row = 0;
+        grid.add(new Label("Question:"), 0, row);
+        grid.add(questionField,         1, row++);
+
+        grid.add(new Label("Answer A:"), 0, row);
+        grid.add(answerAField,          1, row++);
+
+        grid.add(new Label("Answer B:"), 0, row);
+        grid.add(answerBField,          1, row++);
+
+        grid.add(new Label("Answer C:"), 0, row);
+        grid.add(answerCField,          1, row++);
+
+        grid.add(new Label("Answer D:"), 0, row);
+        grid.add(answerDField,          1, row++);
+
+        grid.add(new Label("Correct Answer (letter A/B/C/D):"), 0, row);
+        grid.add(correctAnswerField,                            1, row++);
+
+        grid.add(new Label("Game Difficulty:"), 0, row);
+        grid.add(gameDifficultyCombo,         1, row++);
+
+        grid.add(new Label("Question Difficulty:"), 0, row);
+        grid.add(questionDifficultyCombo,        1, row++);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Disable Save button when any required field is empty
+        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(
+                questionField.textProperty().isEmpty()
+                        .or(answerAField.textProperty().isEmpty())
+                        .or(answerBField.textProperty().isEmpty())
+                        .or(answerCField.textProperty().isEmpty())
+                        .or(answerDField.textProperty().isEmpty())
+                        .or(correctAnswerField.textProperty().isEmpty())
+        );
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                String qText   = questionField.getText().trim();
+                String aA      = answerAField.getText().trim();
+                String aB      = answerBField.getText().trim();
+                String aC      = answerCField.getText().trim();
+                String aD      = answerDField.getText().trim();
+                String correct = correctAnswerField.getText().trim();
+
+                // User enters only the letter A/B/C/D, we map to the full text
+                String correctLetter = correct.toUpperCase();
+                String correctAnswer;
+
+                switch (correctLetter) {
+                    case "A":
+                        correctAnswer = aA;
+                        break;
+                    case "B":
+                        correctAnswer = aB;
+                        break;
+                    case "C":
+                        correctAnswer = aC;
+                        break;
+                    case "D":
+                        correctAnswer = aD;
+                        break;
+                    default:
+                        showError("Correct answer must be the letter A, B, C, or D.");
+                        return null;
+                }
+
+                String gameDiff = gameDifficultyCombo.getValue();
+                if (gameDiff == null || gameDiff.isBlank()) {
+                    gameDiff = "Easy";
+                }
+
+                String questionDiff = questionDifficultyCombo.getValue();
+                if (questionDiff == null || questionDiff.isBlank()) {
+                    questionDiff = "EASY";
+                }
+
+                List<String> answers = List.of(aA, aB, aC, aD);
+                return new Question(qText, answers, correctAnswer, gameDiff, questionDiff);
+            }
+            return null;
+        });
+
+        return dialog.showAndWait().orElse(null);
+    }
+
+    /**
+     * Utility method to show an error alert with the given message.
+     */
+    private void showError(String message) {
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Error");
+        error.setHeaderText("Operation failed");
+        error.setContentText(message);
+        error.showAndWait();
+    }
 }

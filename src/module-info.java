@@ -7,7 +7,7 @@ module MineSweeper_1 {
 
 opens Controller to javafx.fxml, javafx.graphics;
 opens View to javafx.fxml;
-opens View.iconss to javafx.fxml;
+requires org.apache.commons.lang3;
 
 exports Controller;
 exports Model;

@@ -20,7 +20,7 @@
     </padding>
 
     <children>
-        <!-- כותרת -->
+        <!-- Title -->
         <Label fx:id="titleLabel" text="GAME OVER 💣">
             <font>
                 <Font size="40.0"/>
@@ -32,7 +32,7 @@
             </style>
         </Label>
 
-        <!-- קופסת מידע -->
+        <!-- Info Box -->
         <VBox spacing="8.0"
               style="-fx-background-color: rgba(0,0,0,0.45); -fx-background-radius: 18; -fx-padding: 15;">
             <children>
@@ -58,7 +58,7 @@
             </children>
         </VBox>
 
-        <!-- כפתור חזרה -->
+        <!-- Back button -->
         <Button fx:id="backToMenuButton"
                 text="Back to Menu ⬅"
                 prefWidth="260.0"
