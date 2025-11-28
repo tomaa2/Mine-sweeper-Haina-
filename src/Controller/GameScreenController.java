@@ -240,15 +240,42 @@ public class GameScreenController {
     private void showGameOver() {
         int finalScore = gameController.getScore();
         int remainingLives = gameController.getLives();
-        
-        String result = remainingLives > 0 ? "You Won!" : "Game Over!";
-        
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Over");
-        alert.setHeaderText(result);
-        alert.setContentText("Final Score: " + finalScore + "\nRemaining Lives: " + remainingLives);
-        alert.showAndWait();
+
+        String p1Name = gameController.getGame().getPlayer1().getName();
+        String p2Name = gameController.getGame().getPlayer2().getName();
+        String difficulty = gameController.getConfig().name(); // EASY / MEDIUM / HARD
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/GameOverScreen.fxml"));
+            Parent root = loader.load();
+
+            GameOverScreenController controller = loader.getController();
+            controller.initData(p1Name, p2Name, difficulty, finalScore, remainingLives);
+
+            // משתמשים בכל Node מהמסך הנוכחי כדי להגיע ל־Stage (כאן: player1Grid)
+            Stage stage = (Stage) player1Grid.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // אפשר גם לשים כאן Alert קטן אם תרצי fallback
+        }
     }
+
+
+//    private void showGameOver() {
+//        int finalScore = gameController.getScore();
+//        int remainingLives = gameController.getLives();
+//        
+//        String result = remainingLives > 0 ? "You Won!" : "Game Over!";
+//        
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("Game Over");
+//        alert.setHeaderText(result);
+//        alert.setContentText("Final Score: " + finalScore + "\nRemaining Lives: " + remainingLives);
+//        alert.showAndWait();
+//    }
 
     private void handleBackToMenu(MouseEvent event) {
         switchScene((Node) event.getSource(), "/View/MainWindow.fxml");
