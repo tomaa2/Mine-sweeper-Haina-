@@ -2,6 +2,7 @@ package Controller;
 
 import Model.Board;
 import Model.Cell;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -9,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -17,6 +19,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import javafx.animation.AnimationTimer;
 
 import java.io.IOException;
 
@@ -36,7 +39,13 @@ public class GameScreenController {
     @FXML private Label player2NameLabel;
     @FXML private Label player2FlagsLabel;
     @FXML private GridPane player2Grid;
-
+    //timer for each turn
+    private AnimationTimer gameTimer;
+    private long startTimeNanos;
+    private int elapsedSeconds = 0;
+    //track if game has ended
+    private boolean gameOver = false;
+    
     // game logic controller
     private final GameController gameController;
     
@@ -51,6 +60,7 @@ public class GameScreenController {
     public void initializeAfterLoad() {
         setupEventHandlers();
         setupBoards();
+        setupTimer();
         updateUI();
     }
 
@@ -58,6 +68,7 @@ public class GameScreenController {
         backToMenuLabel.setOnMouseClicked(this::handleBackToMenu);
         newGameButton.setOnAction(e -> handleNewGame((Node) e.getSource()));
         modeButton.setOnAction(e -> toggleMode());
+        modeButton.setText("🚩 Flag OFF");
     }
 
     private void setupBoards() {
@@ -98,8 +109,9 @@ public class GameScreenController {
     private Button createCellButton(int playerIndex, int row, int col) {
         Button btn = new Button();
         btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        btn.setMinSize(20, 20);
-        btn.setStyle("-fx-background-color: #cccccc; -fx-border-color: #999999;");
+        btn.setMinSize(25, 25);
+        btn.setPrefSize(30, 30);
+        btn.setStyle("-fx-background-color: #cccccc; -fx-border-color: #999999; -fx-font-size: 12px; -fx-padding: 0;");
 
         btn.setOnMouseClicked(e -> handleCellClick(e, playerIndex, row, col));
 
@@ -107,6 +119,9 @@ public class GameScreenController {
     }
 
     private void handleCellClick(MouseEvent event, int playerIndex, int row, int col) {
+    	//ignores any click if game is over
+    	if(gameOver)
+    		return;
         // check if its this players turn
         int currentPlayerIndex = gameController.getGame().getCurrentPlayerIndex();
         if (playerIndex != currentPlayerIndex) {
@@ -114,20 +129,64 @@ public class GameScreenController {
             return;
         }
 
-        // right click or flag mode = flag
+        //get the cell to check if action is valid
+        Board board = (playerIndex == 1) ? gameController.getBoard1() : gameController.getBoard2();
+        Cell cell = board.getCell(row, col);
+        
+        //ignore if cell is already revealed or flagged
+        if (cell == null || cell.isRevealed() || cell.isFlagged()) {
+            return;
+        }
+
+        //right click or flag mode = flag
         if (event.getButton() == MouseButton.SECONDARY || flagMode) {
             gameController.flagCell(playerIndex, row, col);
+            gameController.switchTurn();
+            // turn off flag mode after using it
+            if (flagMode) {
+                flagMode = false;
+                modeButton.setText("🚩 Flag OFF");
+                modeButton.setStyle("");
+            }
+            
         } else {
             gameController.revealCell(playerIndex, row, col);
         }
-
+        
         updateUI();
         
         if (gameController.checkGameEnd()) {
             showGameOver();
         }
     }
-
+    
+    private void setupTimer() {
+        startTimeNanos = System.nanoTime();
+        
+        gameTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                long elapsedNanos = now - startTimeNanos;
+                int seconds = (int) (elapsedNanos / 1_000_000_000);
+                
+                if (seconds != elapsedSeconds) {
+                    elapsedSeconds = seconds;
+                    updateTimerLabel();
+                }
+            }
+        };
+        gameTimer.start();
+    }
+    private void updateTimerLabel() {
+        int minutes = elapsedSeconds / 60;
+        int secs = elapsedSeconds % 60;
+        
+        if (minutes > 0) {
+            turnLabel.setText("Time: " + minutes + "m " + secs + "s");
+        } else {
+            turnLabel.setText("Time: " + secs + "s");
+        }
+    }
     private void updateUI() {
         scoreLabel.setText("Score: " + gameController.getScore());
         livesLabel.setText(String.valueOf(gameController.getLives()));
@@ -160,35 +219,36 @@ public class GameScreenController {
     }
 
     private void updateCellButton(Button btn, Cell cell) {
+        String baseStyle = "-fx-font-size: 12px; -fx-padding: 0; -fx-border-color: #999999;";
         if (cell.isRevealed()) {
             switch (cell.getCellType()) {
                 case MINE -> {
                     btn.setText("💣");
-                    btn.setStyle("-fx-background-color: #ff6666;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #ff6666;");
                 }
                 case NUMBER -> {
                     btn.setText(String.valueOf(cell.getNumber()));
-                    btn.setStyle("-fx-background-color: #ffffff;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #ffffff;");
                 }
                 case EMPTY -> {
                     btn.setText("");
-                    btn.setStyle("-fx-background-color: #e0e0e0;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #e0e0e0;");
                 }
                 case QUESTION -> {
                     btn.setText(cell.isUsed() ? "✓" : "❓");
-                    btn.setStyle("-fx-background-color: #ffff99;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #ffff99;");
                 }
                 case SURPRISE -> {
                     btn.setText(cell.isUsed() ? "✓" : "🎁");
-                    btn.setStyle("-fx-background-color: #ff99ff;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #ff99ff;");
                 }
             }
         } else if (cell.isFlagged()) {
             btn.setText("🚩");
-            btn.setStyle("-fx-background-color: #ffcc00;");
+            btn.setStyle(baseStyle + "-fx-background-color: #ffcc00;");
         } else {
             btn.setText("");
-            btn.setStyle("-fx-background-color: #cccccc; -fx-border-color: #999999;");
+            btn.setStyle(baseStyle + "-fx-background-color: #cccccc; -fx-border-color: #999999;");
         }
     }
 
@@ -208,36 +268,49 @@ public class GameScreenController {
     }
 
     private void updateFlagCount(Label label, Board board) {
-        int flagged = 0;
+        int foundOrFlagged = 0;
         int totalMines = gameController.getConfig().getTotalMines();
 
         for (int r = 0; r < board.getRows(); r++) {
             for (int c = 0; c < board.getColumns(); c++) {
-                if (board.getCell(r, c).isFlagged()) {
-                    flagged++;
+                Cell cell = board.getCell(r, c);
+                //count only actual mines that are revealed or flagged
+                if (cell.getCellType() == Model.CellType.MINE && (cell.isRevealed() || cell.isFlagged())) {
+                    foundOrFlagged++;
                 }
             }
         }
 
-        label.setText(flagged + "/" + totalMines);
+        label.setText(foundOrFlagged + "/" + totalMines);
     }
-
     private void highlightCurrentPlayer() {
         int current = gameController.getGame().getCurrentPlayerIndex();
         
-        String activeStyle = "-fx-border-color: #00cc00; -fx-border-width: 3;";
-        String inactiveStyle = "-fx-border-color: transparent;";
-
+        String activeStyle = "-fx-border-color: #00cc00; -fx-border-width: 3; -fx-border-style: solid;";
+        String inactiveStyle = "-fx-border-color: transparent; -fx-border-width: 3; -fx-border-style: solid;";
         player1Grid.setStyle(current == 1 ? activeStyle : inactiveStyle);
         player2Grid.setStyle(current == 2 ? activeStyle : inactiveStyle);
     }
 
     private void toggleMode() {
         flagMode = !flagMode;
-        modeButton.setText(flagMode ? "Flag Mode 🚩" : "Reveal Mode 👆");
+        if (flagMode) {
+        	modeButton.setText("🚩 Flag ON");
+        	modeButton.setStyle("-fx-background-color: #ffcc00");
+        }
+        else {
+        	modeButton.setText("🚩 Flag OFF");
+        	modeButton.setStyle("");
+        }
+        
     }
 
     private void showGameOver() {
+    	//first we stop the timer
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+        gameOver = true;
         int finalScore = gameController.getScore();
         int remainingLives = gameController.getLives();
         
@@ -246,16 +319,46 @@ public class GameScreenController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Game Over");
         alert.setHeaderText(result);
-        alert.setContentText("Final Score: " + finalScore + "\nRemaining Lives: " + remainingLives);
+        alert.setContentText("Final Score: " + finalScore + "\nRemaining Lives: " + remainingLives + "\nTimer: " +elapsedSeconds + "s" );
         alert.showAndWait();
     }
 
     private void handleBackToMenu(MouseEvent event) {
-        switchScene((Node) event.getSource(), "/View/MainWindow.fxml");
+    	Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+    	confirm.setTitle("Back to Menu");
+    	confirm.setHeaderText("Are you sure you want to quit?");
+    	confirm.setContentText("Your game progress will be saved.");
+    	confirm.showAndWait().ifPresent(response -> {
+    		if(response == javafx.scene.control.ButtonType.OK)
+    		{
+    			//stop timer and save game
+    			if (gameTimer != null)
+    				gameTimer.stop();
+    			gameController.saveAndEndGame();
+    			switchScene((Node) event.getSource(), "/View/MainWindow.fxml");
+
+    		}
+    		
+    	});
     }
 
     private void handleNewGame(Node source) {
-        switchScene(source, "/View/Gamesetup.fxml");
+    	Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("New Game");
+        confirm.setHeaderText("Are you sure you want to start a new game?");
+        confirm.setContentText("Your current game progress will be saved.");
+        
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == javafx.scene.control.ButtonType.OK) {
+                // stop timer
+                if (gameTimer != null) {
+                    gameTimer.stop();
+                }
+                // save the game
+                gameController.saveAndEndGame();
+                switchScene(source, "/View/Gamesetup.fxml");
+            }
+        });
     }
 
     private void showAlert(String title, String message) {
@@ -267,6 +370,11 @@ public class GameScreenController {
     }
 
     private void switchScene(Node source, String fxmlPath) {
+        //stop timer before switching scene
+    	if (gameTimer != null) {
+            gameTimer.stop();
+        }
+    	
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
