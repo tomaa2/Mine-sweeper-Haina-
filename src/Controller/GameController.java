@@ -79,17 +79,21 @@ public class GameController {
 		if (cell == null || cell.isRevealed() || cell.isFlagged()) {
 			return;
 		}
-
-		cell.setRevealed(true);
-
-		switch (cell.getCellType()) {
-		case MINE -> handleMineCell();
-		case EMPTY -> handleEmptyCell(board, row, col);
-		case NUMBER -> handleNumberCell();
-		case QUESTION -> handleQuestionCell();
-		case SURPRISE -> handleSurpriseCell();
+		// its stopping the floodReveal
+		// cell.setRevealed(true);
+		CellType type = cell.getCellType();
+		if (type == CellType.EMPTY)
+			handleEmptyCell(board, row, col);
+		else {
+			cell.setRevealed(true);
+			switch (cell.getCellType()) {
+			case MINE -> handleMineCell();
+			case EMPTY -> handleEmptyCell(board, row, col);
+			case NUMBER -> handleNumberCell();
+			case QUESTION -> handleQuestionCell();
+			case SURPRISE -> handleSurpriseCell();
+			}
 		}
-
 		checkGameEnd();
 	}
 
@@ -156,12 +160,12 @@ public class GameController {
 	// ------------------------------------ checks if a game
 	// ended-----------------------------------------------//
 	public boolean checkGameEnd() {
-		//check if lost all lives
+		// check if lost all lives
 		if (checkGameEndByLives()) {
 			return true;
 		}
 
-		//check if all non mine cells are revealed on at least one board
+		// check if all non mine cells are revealed on at least one board
 		if (checkBoardCleared(game.getBoard1()) || checkBoardCleared(game.getBoard2())) {
 			endGame();
 			return true;
@@ -174,7 +178,7 @@ public class GameController {
 		for (int r = 0; r < board.getRows(); r++) {
 			for (int c = 0; c < board.getColumns(); c++) {
 				Cell cell = board.getCell(r, c);
-				//if theres a nonmine cell that isnt revealed, board is not cleared
+				// if theres a nonmine cell that isnt revealed, board is not cleared
 				if (cell.getCellType() != CellType.MINE && !cell.isRevealed()) {
 					return false;
 				}
@@ -194,7 +198,7 @@ public class GameController {
 	private void endGame() {
 		EndTime = LocalDateTime.now();
 
-		//convert remaining lives to points
+		// convert remaining lives to points
 		int remainingLives = game.getLives();
 		int activationCost = game.getConfig().getActivationCost();
 		int bonusPoints = remainingLives * activationCost;
@@ -220,203 +224,204 @@ public class GameController {
 	public Question activateQuestionCell(int playerIndex, int row, int col) {
 		Board board = getBoardByIndex(playerIndex);
 		Cell cell = board.getCell(row, col);
-		
+
 		if (cell == null || !cell.isRevealed() || cell.isUsed() || cell.getCellType() != CellType.QUESTION) {
 			return null;
 		}
-		
+
 		cell.setUsed(true);
-		
+
 		// pay the activation cost
 		int activationCost = game.getConfig().getActivationCost();
 		game.modifyScore(-activationCost);
-		
+
 		return sysData.getRandomQuestion();
 	}
-	
+
 	public void applyAnswer(Question question, String playerAnswer) {
 		boolean correct = playerAnswer.equalsIgnoreCase(question.getCorrectAnswer());
 		GameConfig config = game.getConfig();
 		String qLevel = question.getDifficulty();
 		Random rand = new Random();
-		
+
 		// determine game difficulty level
 		int gameLevel = getGameDifficultyLevel(config);
-		
+
 		// apply rewards/penalties based on game difficulty and question level
 		applyQuestionOutcome(gameLevel, qLevel, correct, rand);
-		
+
 		checkGameEnd();
 		switchTurn();
 	}
-	
+
 	private int getGameDifficultyLevel(GameConfig config) {
 		// Easy = 1, Medium = 2, Hard = 3
 		return switch (config) {
-			case EASY -> 1;
-			case MEDIUM -> 2;
-			case HARD -> 3;
+		case EASY -> 1;
+		case MEDIUM -> 2;
+		case HARD -> 3;
 		};
 	}
+
 	private void applyQuestionOutcome(int gameLevel, String qLevel, boolean correct, Random rand) {
 		// based on the PDF table for question outcomes
 		switch (gameLevel) {
-			case 1 -> applyEasyGameOutcome(qLevel, correct, rand);
-			case 2 -> applyMediumGameOutcome(qLevel, correct, rand);
-			case 3 -> applyHardGameOutcome(qLevel, correct, rand);
-		}
-	}
-	
-	private void applyEasyGameOutcome(String qLevel, boolean correct, Random rand) {
-		switch (qLevel) {
-			case "1" -> { // easy question
-				if (correct) {
-					game.modifyScore(3);
-					addLifeWithOverflowCheck(1);
-				} else {
-					// 50% chance to lose 3 pts, 50% nothing
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(-3);
-					}
-				}
-			}
-			case "2" -> { // medium question
-				if (correct) {
-					game.modifyScore(6);
-					revealRandomBomb(getCurrentPlayerBoardIndex());
-				} else {
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(-6);
-					}
-				}
-			}
-			case "3" -> { // hard question
-				if (correct) {
-					game.modifyScore(10);
-					revealRandomArea3x3(getCurrentPlayerBoardIndex());
-				} else {
-					game.modifyScore(-10);
-				}
-			}
-			case "4" -> { // expert question
-				if (correct) {
-					game.modifyScore(15);
-					addLifeWithOverflowCheck(2);
-				} else {
-					game.modifyScore(-15);
-					game.modifyLives(-1);
-				}
-			}
-		}
-	}
-	
-	private void applyMediumGameOutcome(String qLevel, boolean correct, Random rand) {
-		switch (qLevel) {
-			case "1" -> {
-				if (correct) {
-					game.modifyScore(8);
-					addLifeWithOverflowCheck(1);
-				} else {
-					game.modifyScore(-8);
-				}
-			}
-			case "2" -> {
-				if (correct) {
-					game.modifyScore(10);
-					addLifeWithOverflowCheck(1);
-				} else {
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(-10);
-						game.modifyLives(-1);
-					}
-					// else nothing happens
-				}
-			}
-			case "3" -> {
-				if (correct) {
-					game.modifyScore(15);
-					addLifeWithOverflowCheck(1);
-				} else {
-					game.modifyScore(-15);
-					game.modifyLives(-1);
-				}
-			}
-			case "4" -> {
-				if (correct) {
-					game.modifyScore(20);
-					addLifeWithOverflowCheck(2);
-				} else {
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(-20);
-						game.modifyLives(-1);
-					} else {
-						game.modifyScore(-20);
-						game.modifyLives(-2);
-					}
-				}
-			}
+		case 1 -> applyEasyGameOutcome(qLevel, correct, rand);
+		case 2 -> applyMediumGameOutcome(qLevel, correct, rand);
+		case 3 -> applyHardGameOutcome(qLevel, correct, rand);
 		}
 	}
 
-	private void applyHardGameOutcome(String qLevel, boolean correct, Random rand) {
+	private void applyEasyGameOutcome(String qLevel, boolean correct, Random rand) {
 		switch (qLevel) {
-			case "1" -> {
-				if (correct) {
-					game.modifyScore(10);
-					addLifeWithOverflowCheck(1);
-				} else {
+		case "1" -> { // easy question
+			if (correct) {
+				game.modifyScore(3);
+				addLifeWithOverflowCheck(1);
+			} else {
+				// 50% chance to lose 3 pts, 50% nothing
+				if (rand.nextDouble() < 0.5) {
+					game.modifyScore(-3);
+				}
+			}
+		}
+		case "2" -> { // medium question
+			if (correct) {
+				game.modifyScore(6);
+				revealRandomBomb(getCurrentPlayerBoardIndex());
+			} else {
+				if (rand.nextDouble() < 0.5) {
+					game.modifyScore(-6);
+				}
+			}
+		}
+		case "3" -> { // hard question
+			if (correct) {
+				game.modifyScore(10);
+				revealRandomArea3x3(getCurrentPlayerBoardIndex());
+			} else {
+				game.modifyScore(-10);
+			}
+		}
+		case "4" -> { // expert question
+			if (correct) {
+				game.modifyScore(15);
+				addLifeWithOverflowCheck(2);
+			} else {
+				game.modifyScore(-15);
+				game.modifyLives(-1);
+			}
+		}
+		}
+	}
+
+	private void applyMediumGameOutcome(String qLevel, boolean correct, Random rand) {
+		switch (qLevel) {
+		case "1" -> {
+			if (correct) {
+				game.modifyScore(8);
+				addLifeWithOverflowCheck(1);
+			} else {
+				game.modifyScore(-8);
+			}
+		}
+		case "2" -> {
+			if (correct) {
+				game.modifyScore(10);
+				addLifeWithOverflowCheck(1);
+			} else {
+				if (rand.nextDouble() < 0.5) {
 					game.modifyScore(-10);
 					game.modifyLives(-1);
 				}
+				// else nothing happens
 			}
-			case "2" -> {
-				if (correct) {
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(15);
-						addLifeWithOverflowCheck(1);
-					} else {
-						game.modifyScore(15);
-						addLifeWithOverflowCheck(2);
-					}
-				} else {
-					if (rand.nextDouble() < 0.5) {
-						game.modifyScore(-15);
-						game.modifyLives(-1);
-					} else {
-						game.modifyScore(-15);
-						game.modifyLives(-2);
-					}
-				}
+		}
+		case "3" -> {
+			if (correct) {
+				game.modifyScore(15);
+				addLifeWithOverflowCheck(1);
+			} else {
+				game.modifyScore(-15);
+				game.modifyLives(-1);
 			}
-			case "3" -> {
-				if (correct) {
-					game.modifyScore(20);
-					addLifeWithOverflowCheck(2);
+		}
+		case "4" -> {
+			if (correct) {
+				game.modifyScore(20);
+				addLifeWithOverflowCheck(2);
+			} else {
+				if (rand.nextDouble() < 0.5) {
+					game.modifyScore(-20);
+					game.modifyLives(-1);
 				} else {
 					game.modifyScore(-20);
 					game.modifyLives(-2);
 				}
 			}
-			case "4" -> {
-				if (correct) {
-					game.modifyScore(40);
-					addLifeWithOverflowCheck(3);
-				} else {
-					game.modifyScore(-40);
-					game.modifyLives(-3);
-				}
-			}
+		}
 		}
 	}
 
-	// handles the max 10 lives rule - converts overflow to points
+	private void applyHardGameOutcome(String qLevel, boolean correct, Random rand) {
+		switch (qLevel) {
+		case "1" -> {
+			if (correct) {
+				game.modifyScore(10);
+				addLifeWithOverflowCheck(1);
+			} else {
+				game.modifyScore(-10);
+				game.modifyLives(-1);
+			}
+		}
+		case "2" -> {
+			if (correct) {
+				if (rand.nextDouble() < 0.5) {
+					game.modifyScore(15);
+					addLifeWithOverflowCheck(1);
+				} else {
+					game.modifyScore(15);
+					addLifeWithOverflowCheck(2);
+				}
+			} else {
+				if (rand.nextDouble() < 0.5) {
+					game.modifyScore(-15);
+					game.modifyLives(-1);
+				} else {
+					game.modifyScore(-15);
+					game.modifyLives(-2);
+				}
+			}
+		}
+		case "3" -> {
+			if (correct) {
+				game.modifyScore(20);
+				addLifeWithOverflowCheck(2);
+			} else {
+				game.modifyScore(-20);
+				game.modifyLives(-2);
+			}
+		}
+		case "4" -> {
+			if (correct) {
+				game.modifyScore(40);
+				addLifeWithOverflowCheck(3);
+			} else {
+				game.modifyScore(-40);
+				game.modifyLives(-3);
+			}
+		}
+		}
+	}
+
+	// handles the max 10 lives rule converts overflow to points
 	private void addLifeWithOverflowCheck(int livesToAdd) {
 		int currentLives = game.getLives();
 		int maxLives = 10;
 		int activationCost = game.getConfig().getActivationCost();
-		
+
 		int newTotal = currentLives + livesToAdd;
-		
+
 		if (newTotal > maxLives) {
 			int overflow = newTotal - maxLives;
 			game.modifyLives(maxLives - currentLives); // cap at 10
@@ -425,26 +430,25 @@ public class GameController {
 			game.modifyLives(livesToAdd);
 		}
 	}
-	
 
 	public void activateSurpriseCell(int playerIndex, int row, int col) {
 		Board board = getBoardByIndex(playerIndex);
 		Cell cell = board.getCell(row, col);
-		
+
 		if (cell == null || !cell.isRevealed() || cell.isUsed() || cell.getCellType() != CellType.SURPRISE) {
 			return;
 		}
-		
+
 		cell.setUsed(true);
-		
+
 		GameConfig config = game.getConfig();
 		int activationCost = config.getActivationCost();
 		int bonus = config.getSurpriseBonus();
 		int penalty = config.getSurprisePenalty();
-		
+
 		// pay activation cost
 		game.modifyScore(-activationCost);
-		
+
 		// 50-50 good or bad surprise
 		Random rand = new Random();
 		if (rand.nextDouble() < 0.5) {
@@ -456,16 +460,16 @@ public class GameController {
 			game.modifyScore(penalty); // penalty is already negative in config
 			game.modifyLives(-1);
 		}
-		
+
 		checkGameEnd();
 	}
-	
-	//////////////////	/more actions
-	
+
+	////////////////// /more actions
+
 	public void revealRandomBomb(int playerIndex) {
 		Board board = getBoardByIndex(playerIndex);
 		List<Cell> unrevealedMines = new ArrayList<>();
-		
+
 		for (int r = 0; r < board.getRows(); r++) {
 			for (int c = 0; c < board.getColumns(); c++) {
 				Cell cell = board.getCell(r, c);
@@ -474,25 +478,25 @@ public class GameController {
 				}
 			}
 		}
-		
+
 		if (unrevealedMines.isEmpty()) {
 			return;
 		}
-		
+
 		Random rand = new Random();
 		Cell chosen = unrevealedMines.get(rand.nextInt(unrevealedMines.size()));
 		chosen.setRevealed(true);
 		// note: no points awarded for this reveal per PDF rules
 	}
-	
+
 	public void revealRandomArea3x3(int playerIndex) {
 		Board board = getBoardByIndex(playerIndex);
 		Random rand = new Random();
-		
+
 		// pick a random center point
 		int centerRow = rand.nextInt(board.getRows());
 		int centerCol = rand.nextInt(board.getColumns());
-		
+
 		// reveal 3x3 area around center
 		for (int r = centerRow - 1; r <= centerRow + 1; r++) {
 			for (int c = centerCol - 1; c <= centerCol + 1; c++) {
@@ -505,7 +509,9 @@ public class GameController {
 			}
 		}
 	}
-	//------------------------------------ Save Results -------------------------------------------------//
+
+	// ------------------------------------ Save Results
+	// -------------------------------------------------//
 	private void saveGameResult() {
 		if (StartTime == null) {
 			StartTime = LocalDateTime.now();
@@ -513,42 +519,46 @@ public class GameController {
 		if (EndTime == null) {
 			EndTime = LocalDateTime.now();
 		}
-		
+
 		long durationSecs = Duration.between(StartTime, EndTime).getSeconds();
-		
+
 		String difficultyName = game.getConfig().name();
-		
-		GameSummary summary = new GameSummary(
-			game.getPlayer1().getName(),
-			game.getPlayer2().getName(),
-			difficultyName,
-			String.valueOf(game.getScore()),
-			durationSecs,
-			StartTime,
-			EndTime
-		);
-		
+
+		GameSummary summary = new GameSummary(game.getPlayer1().getName(), game.getPlayer2().getName(), difficultyName,
+				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime);
+
 		gameResultsController.addGameHistory(summary);
 		System.out.println("Game result saved successfully.");
 	}
-	
-	////////////////getters for view
+
+	public void saveAndEndGame() {
+		if (EndTime == null) {
+			EndTime = LocalDateTime.now();
+		}
+		if (StartTime == null) {
+			StartTime = LocalDateTime.now();
+		}
+
+		saveGameResult();
+	}
+
+	//////////////// getters for view
 	public int getScore() {
 		return game.getScore();
 	}
-	
+
 	public int getLives() {
 		return game.getLives();
 	}
-	
+
 	public Board getBoard1() {
 		return game.getBoard1();
 	}
-	
+
 	public Board getBoard2() {
 		return game.getBoard2();
 	}
-	
+
 	public GameConfig getConfig() {
 		return game.getConfig();
 	}

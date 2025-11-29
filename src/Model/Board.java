@@ -88,15 +88,19 @@ public class Board {
 		if (cell.isRevealed() || cell.isFlagged()) {
 			return;
 		}
+		
+	    //stop if its a mine/question/surprise
+	    if (cell.getCellType() == CellType.MINE || 
+	        cell.getCellType() == CellType.QUESTION || 
+	        cell.getCellType() == CellType.SURPRISE) {
+	        return;
+	    }
 		// reveal the current cell
 		cell.setRevealed(true);
-
-		// only continue flood if cell is truly empty (no adjacent mines)
-		// NUMBER cells stop the cascade but are revealed
-		// MINE, QUESTION, SURPRISE cells also stop cascade
-		if (cell.getCellType() != CellType.EMPTY) {
-			return;
-		}
+	    //if its a NUMBER cell then reveal it but dont continue flood
+	    if (cell.getCellType() == CellType.NUMBER) {
+	        return;
+	    }
 
 		// recursively reveal all 8 neighbors
 		for (int dr = -1; dr <= 1; dr++) {
@@ -104,21 +108,7 @@ public class Board {
 				if (dr == 0 && dc == 0) {
 					continue; // skip the center cell
 				}
-				int newRow = row + dr;
-				int newCol = col + dc;
-
-				if (isInBounds(newRow, newCol)) {
-					Cell neighbor = grid[newRow][newCol];
-					
-					// reveal neighbor if not already revealed and not flagged
-					if (!neighbor.isRevealed() && !neighbor.isFlagged()) {
-						// if neighbor is empty or number, continue flood
-						if (neighbor.getCellType() == CellType.EMPTY || 
-							neighbor.getCellType() == CellType.NUMBER) {
-							floodReveal(newRow, newCol);
-						}
-					}
-				}
+				floodReveal(row + dr, col + dc);
 			}
 		}
 	}
