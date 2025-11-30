@@ -10,15 +10,17 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+
         try {
             // Load the first screen: MainWindow.fxml from the View package
             FXMLLoader loader =
                     new FXMLLoader(getClass().getResource("/View/MainWindow.fxml"));
             Parent root = loader.load();
 
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root );
             primaryStage.setTitle("Mine Sweeper");
             primaryStage.setScene(scene);
+            primaryStage.setResizable(false);
             primaryStage.show();
 
         } catch (Exception e) {

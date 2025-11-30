@@ -14,7 +14,6 @@ public class Question {
     private String correctAnswer;
 
     // New fields
-    private String gameDifficulty;        // Game difficulty level
     private String questionDifficulty;    // Question difficulty level
 
     // Full constructor
@@ -25,7 +24,6 @@ public class Question {
         this.answers = new ArrayList<>(answers);
         this.correctAnswer = correctAnswer;
 
-        this.gameDifficulty = gameDifficulty;
         this.questionDifficulty = questionDifficulty;
     }
 
@@ -61,15 +59,6 @@ public class Question {
     public void setCorrectAnswer(String correctAnswer) {
         this.correctAnswer = correctAnswer;
     }
-
-    public String getGameDifficulty() {
-        return gameDifficulty;
-    }
-
-    public void setGameDifficulty(String gameDifficulty) {
-        this.gameDifficulty = gameDifficulty;
-    }
-
     public String getQuestionDifficulty() {
         return questionDifficulty;
     }
@@ -93,7 +82,6 @@ public class Question {
                 "question='" + question + '\'' +
                 ", answers=" + answers +
                 ", correctAnswer='" + correctAnswer + '\'' +
-                ", gameDifficulty='" + gameDifficulty + '\'' +
                 ", questionDifficulty='" + questionDifficulty + '\'' +
                 '}';
     }

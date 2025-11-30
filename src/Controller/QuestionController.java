@@ -29,20 +29,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-/**
- * QuestionController
- *
- * This class has a dual role:
- *  1) Manages loading and saving questions from/to a CSV file.
- *  2) Serves as the JavaFX controller for the Question.fxml screen
- *     (Question Bank UI: view, filter, add, edit, delete questions).
- *
- * It expects:
- *  - Model.Question with fields: question text, answers (List<String> of size 4),
- *    correct answer (String), gameDifficulty and questionDifficulty.
- *  - Model.SysData as a singleton that holds the list of questions and provides
- *    addQuestion, editQuestion, deleteQuestion, getQuestions, setQuestions methods.
- */
 public class QuestionController {
 
     // ===== CSV file path =====
@@ -62,8 +48,7 @@ public class QuestionController {
     // ===== Filters (injected from FXML) =====
     @FXML private TextField  searchField;
     @FXML private ComboBox<String> categoryFilterCombo;
-    @FXML private ComboBox<String> difficultyFilterCombo; // Question difficulty
-    @FXML private ComboBox<String> GameFilterCombo;       // Game difficulty
+    @FXML private ComboBox<String> difficultyFilterCombo; // Question difficulty ONLY
 
     // ===== Table (injected from FXML) =====
     @FXML private TableView<Question> questionsTable;
@@ -83,10 +68,9 @@ public class QuestionController {
     public QuestionController() {
         this.csvFilePath = "src/questions.csv";
     }
+
     /**
      * Called automatically by JavaFX after the FXML is loaded.
-     * Initializes the Question Bank screen: loads questions, configures table,
-     * sets up filters and counters.
      */
     @FXML
     private void initialize() {
@@ -105,13 +89,6 @@ public class QuestionController {
             categoryFilterCombo.getSelectionModel().select("All Categories");
         }
 
-        if (GameFilterCombo != null) {
-            GameFilterCombo.getItems().setAll(
-                    "All Game Difficulties", "Easy", "Medium", "Hard"
-            );
-            GameFilterCombo.getSelectionModel().select("All Game Difficulties");
-        }
-
         // 1. Load questions from CSV into SysData + masterData (only if empty)
         if (SysData.getInstance().getQuestions() == null
                 || SysData.getInstance().getQuestions().isEmpty()) {
@@ -120,11 +97,8 @@ public class QuestionController {
             masterData.setAll(SysData.getInstance().getQuestions());
         }
 
-       // System.out.println("MasterData size after init = " + masterData.size());
-
         // 2. Configure table columns
         if (difficultyColumn != null) {
-            // show question difficulty (EASY / MEDIUM / HARD / EXPERT)
             difficultyColumn.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getQuestionDifficulty())
             );
@@ -162,14 +136,10 @@ public class QuestionController {
         if (difficultyFilterCombo != null) {
             difficultyFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
         }
-        if (GameFilterCombo != null) {
-            GameFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilters());
-        }
 
         // 6. Initial counters
         updateCounters();
     }
-
 
     /**
      * Creates the "Actions" column (edit & delete buttons for each question row).
@@ -219,9 +189,7 @@ public class QuestionController {
         });
     }
 
-    /**
-     * Loads questions from a CSV file into SysData.
-     */
+ 
     public void loadQuestions(String filePath) {
         this.csvFilePath = filePath;
         List<Question> loadedQuestions = new ArrayList<>();
@@ -241,46 +209,26 @@ public class QuestionController {
                 while ((line = reader.readNext()) != null) {
                     System.out.println("CSV LINE: " + Arrays.toString(line));
 
-                    String questionText;
-                    String gameDifficulty;
-                    String questionDifficulty;
-                    List<String> answers = new ArrayList<>();
-                    String correctAnswer;
-
-                    if (line.length >= 9) {
-                        // New format with game difficulty
-                        questionText       = line[1];
-                        gameDifficulty     = line[2];
-                        questionDifficulty = line[3];
-
-                        answers.add(line[4]);
-                        answers.add(line[5]);
-                        answers.add(line[6]);
-                        answers.add(line[7]);
-
-                        correctAnswer = line[8];
-                    } else if (line.length >= 8) {
-                        // Old format – assume gameDifficulty = "Easy"
-                        questionText       = line[1];
-                        gameDifficulty     = "Easy";
-                        questionDifficulty = line[2];
-
-                        answers.add(line[3]);
-                        answers.add(line[4]);
-                        answers.add(line[5]);
-                        answers.add(line[6]);
-
-                        correctAnswer = line[7];
-                    } else {
+                    if (line.length < 8) {
                         System.out.println("Skipping line, not enough columns.");
                         continue;
                     }
+
+                    String questionText       = line[1];
+                    String questionDifficulty = line[2];
+
+                    List<String> answers = new ArrayList<>();
+                    answers.add(line[3]);
+                    answers.add(line[4]);
+                    answers.add(line[5]);
+                    answers.add(line[6]);
+
+                    String correctAnswer = line[7];
 
                     Question q = new Question(
                             questionText,
                             answers,
                             correctAnswer,
-                            gameDifficulty,
                             questionDifficulty
                     );
                     loadedQuestions.add(q);
@@ -299,7 +247,6 @@ public class QuestionController {
 
     /**
      * Saves the current questions from SysData to the CSV file.
-     * Always uses the new 9-column format.
      */
     public void saveQuestions() {
         String filePath = this.csvFilePath;
@@ -308,7 +255,7 @@ public class QuestionController {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
             // Header
             writer.writeNext(new String[]{
-                    "ID", "Question", "GameDifficulty", "QuestionDifficulty",
+                    "ID", "Question", "Difficulty",
                     "A", "B", "C", "D", "Correct Answer"
             });
 
@@ -317,7 +264,6 @@ public class QuestionController {
                 writer.writeNext(new String[]{
                         String.valueOf(id++),
                         q.getQuestion(),
-                        q.getGameDifficulty(),
                         q.getQuestionDifficulty(),
                         q.getAnswers().get(0),
                         q.getAnswers().get(1),
@@ -335,10 +281,8 @@ public class QuestionController {
         }
     }
 
-
     /**
-     * Applies search, question difficulty and game difficulty filters
-     * over the question list.
+     * Applies search + question difficulty filters.
      */
     private void applyFilters() {
         String searchText = (searchField != null) ? searchField.getText() : "";
@@ -346,10 +290,6 @@ public class QuestionController {
         String questionDiffFilter = (difficultyFilterCombo != null)
                 ? difficultyFilterCombo.getValue()
                 : "All Question Difficulties";
-
-        String gameDiffFilter = (GameFilterCombo != null)
-                ? GameFilterCombo.getValue()
-                : "All Game Difficulties";
 
         if (filteredData == null) {
             return;
@@ -363,11 +303,7 @@ public class QuestionController {
                     || questionDiffFilter.toLowerCase().startsWith("all"))
                     || q.getQuestionDifficulty().equalsIgnoreCase(questionDiffFilter);
 
-            boolean matchesGameDiff = (gameDiffFilter == null
-                    || gameDiffFilter.toLowerCase().startsWith("all"))
-                    || q.getGameDifficulty().equalsIgnoreCase(gameDiffFilter);
-
-            return matchesText && matchesQuestionDiff && matchesGameDiff;
+            return matchesText && matchesQuestionDiff;
         });
 
         updateCounters();
@@ -376,7 +312,6 @@ public class QuestionController {
     /**
      * Updates the difficulty counters at the top of the screen
      * using the currently filtered data.
-     * (Counters are by question difficulty.)
      */
     private void updateCounters() {
         if (filteredData == null) {
@@ -425,15 +360,11 @@ public class QuestionController {
         if (categoryFilterCombo != null) {
             categoryFilterCombo.getSelectionModel().select("All Categories");
         }
-        if (GameFilterCombo != null) {
-            GameFilterCombo.getSelectionModel().select("All Game Difficulties");
-        }
         applyFilters();
     }
 
     /**
      * Handles the "Add Question" button.
-     * Opens a dialog to create a new question.
      */
     @FXML
     private void handleAddQuestion() {
@@ -451,7 +382,7 @@ public class QuestionController {
     }
 
     /**
-     * Handles editing of an existing question (triggered from Actions column).
+     * Handles editing of an existing question.
      */
     private void handleEditQuestion(Question question) {
         if (question == null) {
@@ -477,7 +408,7 @@ public class QuestionController {
     }
 
     /**
-     * Handles deletion of a question (triggered from Actions column).
+     * Handles deletion of a question.
      */
     private void handleDeleteQuestion(Question question) {
         if (question == null) {
@@ -523,12 +454,8 @@ public class QuestionController {
         }
     }
 
-
     /**
-     * Displays a dialog for creating or editing a question.
-     *
-     * @param existingQuestion if null → create mode; otherwise edit mode.
-     * @return new Question if the user confirms with valid data, or null otherwise.
+     * Dialog for creating or editing a question (WITHOUT gameDifficulty).
      */
     private Question showQuestionDialog(Question existingQuestion) {
         boolean isEditMode = (existingQuestion != null);
@@ -546,9 +473,6 @@ public class QuestionController {
         TextField answerCField       = new TextField();
         TextField answerDField       = new TextField();
         TextField correctAnswerField = new TextField();
-
-        ComboBox<String> gameDifficultyCombo = new ComboBox<>();
-        gameDifficultyCombo.getItems().addAll("Easy", "Medium", "Hard");
 
         ComboBox<String> questionDifficultyCombo = new ComboBox<>();
         questionDifficultyCombo.getItems().addAll("EASY", "MEDIUM", "HARD", "EXPERT");
@@ -574,13 +498,10 @@ public class QuestionController {
             }
             correctAnswerField.setText(correctLetter);
 
-            gameDifficultyCombo.getSelectionModel()
-                    .select(existingQuestion.getGameDifficulty());
             questionDifficultyCombo.getSelectionModel()
                     .select(existingQuestion.getQuestionDifficulty());
 
         } else {
-            gameDifficultyCombo.getSelectionModel().select("Easy");
             questionDifficultyCombo.getSelectionModel().select("EASY");
         }
 
@@ -607,9 +528,6 @@ public class QuestionController {
 
         grid.add(new Label("Correct Answer (letter A/B/C/D):"), 0, row);
         grid.add(correctAnswerField,                            1, row++);
-
-        grid.add(new Label("Game Difficulty:"), 0, row);
-        grid.add(gameDifficultyCombo,         1, row++);
 
         grid.add(new Label("Question Difficulty:"), 0, row);
         grid.add(questionDifficultyCombo,        1, row++);
@@ -657,18 +575,14 @@ public class QuestionController {
                         return null;
                 }
 
-                String gameDiff = gameDifficultyCombo.getValue();
-                if (gameDiff == null || gameDiff.isBlank()) {
-                    gameDiff = "Easy";
-                }
-
                 String questionDiff = questionDifficultyCombo.getValue();
                 if (questionDiff == null || questionDiff.isBlank()) {
                     questionDiff = "EASY";
                 }
 
                 List<String> answers = List.of(aA, aB, aC, aD);
-                return new Question(qText, answers, correctAnswer, gameDiff, questionDiff);
+                // שימי לב: כאן הקונסטרקטור בלי gameDifficulty
+                return new Question(qText, answers, correctAnswer, questionDiff);
             }
             return null;
         });
