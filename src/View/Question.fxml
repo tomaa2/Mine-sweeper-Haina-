@@ -163,14 +163,6 @@
                                  -fx-border-color: #e5e7eb;
                                  -fx-padding: 2 6;"/>
                                  
-                 <ComboBox fx:id="GameFilterCombo"
-                          promptText="Gdifficulty"
-                          prefWidth="180"
-                          style="-fx-background-radius: 9;
-                                 -fx-border-radius: 9;
-                                 -fx-border-color: #e5e7eb;
-                                 -fx-padding: 2 6;"/>
-
                 <ComboBox fx:id="difficultyFilterCombo"
                           promptText="Difficulty"
                           prefWidth="180"
