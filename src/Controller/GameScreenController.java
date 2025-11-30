@@ -305,22 +305,40 @@ public class GameScreenController {
         
     }
 
+    /**
+     * Displays the Game Over screen by loading GameOverScreen.fxml.
+     * Stops the timer, collects final game data, and switches the scene.
+     */
     private void showGameOver() {
-    	//first we stop the timer
         if (gameTimer != null) {
             gameTimer.stop();
         }
         gameOver = true;
+
+        // Collect end-game data
+        String p1 = gameController.getGame().getPlayer1().getName();
+        String p2 = gameController.getGame().getPlayer2().getName();
+        String difficulty = gameController.getConfig().name();
         int finalScore = gameController.getScore();
         int remainingLives = gameController.getLives();
-        
-        String result = remainingLives > 0 ? "You Won!" : "Game Over!";
-        
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Over");
-        alert.setHeaderText(result);
-        alert.setContentText("Final Score: " + finalScore + "\nRemaining Lives: " + remainingLives + "\nTimer: " +elapsedSeconds + "s" );
-        alert.showAndWait();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/View/GameOverScreen.fxml"));
+            Parent root = loader.load();
+
+            // Pass the final results into the GameOver controller
+            GameOverScreenController controller = loader.getController();
+            controller.initData(p1, p2, difficulty, finalScore, remainingLives);
+
+            // Switch scene
+            Stage stage = (Stage) backToMenuLabel.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleBackToMenu(MouseEvent event) {

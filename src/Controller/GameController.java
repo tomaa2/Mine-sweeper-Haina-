@@ -174,17 +174,29 @@ public class GameController {
 		return false;
 	}
 
+	/**
+	 * Checks whether all mines on a given board have been found.
+	 * A mine is considered "found" if it is revealed or flagged.
+	 *
+	 * @param board the board to check
+	 * @return true if all mines were found/flagged, otherwise false
+	 */
 	private boolean checkBoardCleared(Board board) {
-		for (int r = 0; r < board.getRows(); r++) {
-			for (int c = 0; c < board.getColumns(); c++) {
-				Cell cell = board.getCell(r, c);
-				// if theres a nonmine cell that isnt revealed, board is not cleared
-				if (cell.getCellType() != CellType.MINE && !cell.isRevealed()) {
-					return false;
-				}
-			}
-		}
-		return true;
+	    int totalMines = game.getConfig().getTotalMines();
+	    int foundOrFlagged = 0;
+
+	    for (int r = 0; r < board.getRows(); r++) {
+	        for (int c = 0; c < board.getColumns(); c++) {
+	            Cell cell = board.getCell(r, c);
+
+	            if (cell.getCellType() == CellType.MINE &&
+	                (cell.isRevealed() || cell.isFlagged())) {
+	                foundOrFlagged++;
+	            }
+	        }
+	    }
+
+	    return foundOrFlagged == totalMines;
 	}
 
 	public boolean checkGameEndByLives() {
