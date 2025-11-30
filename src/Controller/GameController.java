@@ -23,14 +23,17 @@ public class GameController {
 	private LocalDateTime EndTime; // variable for gameend time
 	private final GameResultsController gameResultsController; // variable for handeling and saving game result
 	private final SysData sysData; // Access to the questions database
-
+	private boolean resultSaved = false;   // if  we saved the game results
 	public GameController(String name1, String name2, GameConfig config) {
 		Player player1 = new Player(name1);
 		Player player2 = new Player(name2);
 		this.game = new Game(player1, player2, config);
 		this.gameResultsController = new GameResultsController();
 		this.sysData = SysData.getInstance();
-
+         
+		   // start of the game
+	    this.StartTime = LocalDateTime.now(); 
+	    
 		// Start the game with player1 turn
 		player1.setTurn(true);
 		player2.setTurn(false);
@@ -525,9 +528,10 @@ public class GameController {
 	// ------------------------------------ Save Results
 	// -------------------------------------------------//
 	private void saveGameResult() {
-		if (StartTime == null) {
-			StartTime = LocalDateTime.now();
-		}
+		   if (resultSaved) {
+		        return;
+		    }
+		    resultSaved = true;
 		if (EndTime == null) {
 			EndTime = LocalDateTime.now();
 		}
@@ -547,10 +551,6 @@ public class GameController {
 		if (EndTime == null) {
 			EndTime = LocalDateTime.now();
 		}
-		if (StartTime == null) {
-			StartTime = LocalDateTime.now();
-		}
-
 		saveGameResult();
 	}
 
