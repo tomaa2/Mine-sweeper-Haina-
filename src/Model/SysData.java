@@ -1,9 +1,12 @@
 package Model;
 
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import com.opencsv.CSVReader;
 
 public class SysData {
 	
@@ -34,20 +37,66 @@ public class SysData {
     /*---------------------------------------------question methods------------------------------------------*/
     
     //adding questions avoiding duplicates
+//    public boolean addQuestion(Question question) {
+//    	if(question == null)
+//    		return false;
+//    	
+//    	//avoiding duplicates
+//    	for(Question q : questions) {
+//    		if(q.getQuestion().equals(question.getQuestion()))
+//    			return false;
+//    	}
+//    	questions.add(question);
+//    	return true;
+//    		
+//    }
+//    
+    /**
+     * Adds a new question to the system.
+     * The function checks the CSV file itself to avoid duplicates.
+     *
+     * @return true if added successfully, false if the question already exists.
+     */
     public boolean addQuestion(Question question) {
-    	if(question == null)
-    		return false;
-    	
-    	//avoiding duplicates
-    	for(Question q : questions) {
-    		if(q.getQuestion().equals(question.getQuestion()))
-    			return false;
-    	}
-    	questions.add(question);
-    	return true;
-    		
+        if (question == null) {
+            return false;
+        }
+
+        String newText = question.getQuestion().trim().toLowerCase();
+
+        // === 1. Load all existing questions from CSV ===
+        List<String[]> csvRows = new ArrayList<>();
+
+        try (CSVReader reader = new CSVReader(new FileReader("src/questions.csv"))) {
+
+            String[] line;
+            reader.readNext(); // skip header
+
+            while ((line = reader.readNext()) != null) {
+                csvRows.add(line);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // === 2. Check duplicates inside the CSV file ===
+        for (String[] row : csvRows) {
+            if (row.length < 2) continue;
+
+            String existingText = row[1].trim().toLowerCase(); // column 1 = question text
+
+            if (existingText.equals(newText)) {
+                System.out.println("Duplicate found in CSV, not adding: " + newText);
+                return false;
+            }
+        }
+
+        // === 3. If no duplicate → add to SysData list ===
+        questions.add(question);
+        return true;
     }
-    
+
     //add more than one question
     public void addQuestions(List<Question> questions) {
     	if(questions!=null)
