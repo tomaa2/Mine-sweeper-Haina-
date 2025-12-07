@@ -74,6 +74,8 @@ public class QuestionController {
      */
     @FXML
     private void initialize() {
+        System.out.println("=== QuestionController.initialize() ===");
+
         // 0. Populate filter combo boxes
         if (difficultyFilterCombo != null) {
             difficultyFilterCombo.getItems().setAll(
@@ -89,13 +91,9 @@ public class QuestionController {
             categoryFilterCombo.getSelectionModel().select("All Categories");
         }
 
-        // 1. Load questions from CSV into SysData + masterData (only if empty)
-        if (SysData.getInstance().getQuestions() == null
-                || SysData.getInstance().getQuestions().isEmpty()) {
-            loadQuestions(csvFilePath);
-        } else {
-            masterData.setAll(SysData.getInstance().getQuestions());
-        }
+        // 1. ALWAYS load questions from CSV into masterData + SysData
+        loadQuestions(csvFilePath);
+        System.out.println("MasterData size after initialize = " + masterData.size());
 
         // 2. Configure table columns
         if (difficultyColumn != null) {
@@ -122,6 +120,7 @@ public class QuestionController {
         if (questionsTable != null) {
             sortedData.comparatorProperty().bind(questionsTable.comparatorProperty());
             questionsTable.setItems(sortedData);
+            System.out.println("Table items size after bind = " + questionsTable.getItems().size());
         }
 
         // 4. Setup actions column (edit/delete buttons per row)
@@ -189,13 +188,19 @@ public class QuestionController {
         });
     }
 
- 
+    /**
+     * Loads questions from a CSV file into masterData and SysData.
+     */
     public void loadQuestions(String filePath) {
         this.csvFilePath = filePath;
+
+        masterData.clear();  // ננקה קודם
         List<Question> loadedQuestions = new ArrayList<>();
 
         try {
             File f = new File(filePath);
+            System.out.println("Loading questions from: " + f.getAbsolutePath());
+
             if (!f.exists()) {
                 System.out.println("CSV file not found, no questions loaded.");
                 return;
@@ -208,6 +213,7 @@ public class QuestionController {
 
                 while ((line = reader.readNext()) != null) {
                     System.out.println("CSV LINE: " + Arrays.toString(line));
+                    System.out.println("Line length = " + line.length);
 
                     if (line.length < 8) {
                         System.out.println("Skipping line, not enough columns.");
@@ -231,26 +237,30 @@ public class QuestionController {
                             correctAnswer,
                             questionDifficulty
                     );
+
                     loadedQuestions.add(q);
+                    masterData.add(q);  // נוסיף גם ל-masterData
                 }
             }
 
-            SysData.getInstance().setQuestions(loadedQuestions);
-            masterData.setAll(loadedQuestions);
-            System.out.println("Questions loaded successfully from CSV.");
+            SysData.getInstance().setQuestions(new ArrayList<>(masterData));
+            System.out.println("Questions loaded successfully from CSV. Count = " + loadedQuestions.size());
+            System.out.println("MasterData size after load = " + masterData.size());
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Failed to load questions: ");
+            System.out.println("Failed to load questions: " + e.getMessage());
         }
     }
 
     /**
-     * Saves the current questions from SysData to the CSV file.
+     * Saves the current questions from masterData to the CSV file.
      */
     public void saveQuestions() {
         String filePath = this.csvFilePath;
-        List<Question> questions = SysData.getInstance().getQuestions();
+
+        // Save based on what is actually in the table/masterData
+        List<Question> questions = new ArrayList<>(masterData);
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
             // Header
@@ -273,7 +283,10 @@ public class QuestionController {
                 });
             }
 
-            System.out.println("Questions saved successfully to CSV.");
+            System.out.println("Questions saved successfully to CSV. Count = " + questions.size());
+
+            // Keep SysData in sync as well
+            SysData.getInstance().setQuestions(questions);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -581,7 +594,6 @@ public class QuestionController {
                 }
 
                 List<String> answers = List.of(aA, aB, aC, aD);
-                // שימי לב: כאן הקונסטרקטור בלי gameDifficulty
                 return new Question(qText, answers, correctAnswer, questionDiff);
             }
             return null;
