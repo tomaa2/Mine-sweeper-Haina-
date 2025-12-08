@@ -184,7 +184,8 @@ public class GameResultsController {
 
     // Add a game result to the history
     public void addGameHistory(GameSummary summary) {
-        SysData.getInstance().addGame(summary);
+    	loadGameHistory();  //load all the history's from csv  file 
+        SysData.getInstance().addGame(summary); //add the current game history
         saveGameHistory();
         System.out.println("Game added to history successfully.");
     }

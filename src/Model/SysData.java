@@ -162,12 +162,11 @@ public class SysData {
     	return true;
     }
     
-    public void addGames(List<GameSummary> games) {
+    public void addGames(List<GameSummary> newGames) {
     	if(games == null)
     		return;
-    	for(GameSummary g : games) {
-    		games.add(g);
-    	}
+    	 games.clear();      
+    	    games.addAll(newGames);  
     }
     
     //delete a Game from history

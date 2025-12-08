@@ -451,7 +451,7 @@ public class QuestionController {
      * Handles navigation back to the main menu.
      */
     @FXML
-    private void handleBackToMenu() {
+    private void handleBackToMenu() { 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/View/MainWindow.fxml"));
             Parent root = loader.load();

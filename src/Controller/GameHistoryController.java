@@ -1,46 +1,280 @@
 package Controller;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
 
+import Model.GameSummary;
+import Model.SysData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
  * Controller for the Game History screen.
- * 
- * Handles the "Back" label, which sends the user
- * back to the main menu when clicked.
+ * Loads game history from CSV, updates summary statistics,
+ * and displays recent games dynamically in the UI.
  */
 public class GameHistoryController {
 
-    // Label that works like a Back button
+    // Top bar
     @FXML
     private Label backLabel;
 
+    @FXML
+    private Button clearHistoryButton;
+
+    // Summary cards
+    @FXML
+    private Label totalGamesValueLabel;
+
+    @FXML
+    private Label victoriesValueLabel;
+
+    @FXML
+    private Label winRateValueLabel;
+
+    @FXML
+    private Label bestTimeValueLabel;
+
+    // Container for dynamically created game rows
+    @FXML
+    private VBox gamesListContainer;
+
+    private final GameResultsController resultsController = new GameResultsController();
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy, HH:mm:ss");
+
     /**
      * Called automatically when the screen loads.
-     * Sets the Back label to respond to mouse clicks.
+     * Initializes UI event handlers, loads game history,
+     * updates summary statistics, and builds the recent games list.
      */
     @FXML
     private void initialize() {
+        // Back to menu button
         backLabel.setOnMouseClicked(this::handleBackToMenu);
+
+        // Clear history button
+        clearHistoryButton.setOnAction(e -> handleClearHistory());
+
+        // 1. Load history from CSV into SysData
+        resultsController.loadGameHistory();
+
+        // 2. Get all loaded games
+        List<GameSummary> games = SysData.getInstance().getAllGames();
+
+        // 3. Update the top summary cards
+        updateSummaryCards(games);
+
+        // 4. Fill the scroll list with game rows
+        populateGamesList(games);
+    }
+
+    /* ========= SUMMARY CARDS ========= */
+
+    /**
+     * Updates total games, victory count, win rate,
+     * and best time from the loaded game history.
+     */
+    private void updateSummaryCards(List<GameSummary> games) {
+        int total = games.size();
+        totalGamesValueLabel.setText(String.valueOf(total));
+
+        // Count victories — assumed: positive score = win
+        long victories = games.stream()
+                .filter(g -> {
+                    try {
+                        return Integer.parseInt(g.getScore()) > 0;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .count();
+
+        victoriesValueLabel.setText(String.valueOf(victories));
+
+        String winRateStr = total == 0
+                ? "0.0%"
+                : String.format("%.1f%%", (victories * 100.0) / total);
+        winRateValueLabel.setText(winRateStr);
+
+        // Best time = shortest duration in seconds
+        if (total == 0) {
+            bestTimeValueLabel.setText("-");
+        } else {
+            long bestSeconds = games.stream()
+                    .mapToLong(GameSummary::getDurationSeconds)
+                    .filter(s -> s > 0)
+                    .min()
+                    .orElse(0);
+
+            if (bestSeconds <= 0) {
+                bestTimeValueLabel.setText("-");
+            } else {
+                bestTimeValueLabel.setText(formatDuration(bestSeconds));
+            }
+        }
     }
 
     /**
-     * Returns the user to the main menu screen.
+     * Converts seconds into "HH:mm:ss" or "mm:ss" format.
+     */
+    private String formatDuration(long totalSeconds) {
+        long h = totalSeconds / 3600;
+        long m = (totalSeconds % 3600) / 60;
+        long s = totalSeconds % 60;
+
+        if (h > 0) {
+            return String.format("%02d:%02d:%02d", h, m, s);
+        } else {
+            return String.format("%02d:%02d", m, s);
+        }
+    }
+
+    /* ========= RECENT GAMES LIST ========= */
+
+    /**
+     * Sorts the game list and creates a UI row for each game.
+     */
+    private void populateGamesList(List<GameSummary> games) {
+        gamesListContainer.getChildren().clear();
+
+        // Create mutable copy (SysData may return unmodifiable list)
+        List<GameSummary> sortedGames = new ArrayList<>(games);
+
+        // Sort by start time (newest first)
+        sortedGames.sort(
+                Comparator.comparing(GameSummary::getStartTime)
+                          .reversed()
+        );
+
+        // Build rows
+        for (GameSummary g : sortedGames) {
+            HBox row = buildGameRow(g);
+            gamesListContainer.getChildren().add(row);
+        }
+
+        // If no games exist
+        if (sortedGames.isEmpty()) {
+            Label emptyLabel = new Label("No games played yet.");
+            emptyLabel.setStyle("-fx-text-fill: #9ba3c7;");
+            gamesListContainer.getChildren().add(emptyLabel);
+        }
+    }
+
+    /**
+     * Creates an HBox representing a single game entry in the history list.
+     */
+    private HBox buildGameRow(GameSummary game) {
+        HBox row = new HBox(10);
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        row.setPrefHeight(60);
+        row.setStyle("-fx-background-color: #151b2b; -fx-background-radius: 12;");
+        row.setPadding(new Insets(10, 16, 10, 16));
+
+        // Optional icon
+        ImageView icon = new ImageView();
+        icon.setFitHeight(24);
+        icon.setFitWidth(24);
+        icon.setPreserveRatio(true);
+
+        try {
+            Image img = new Image(getClass().getResourceAsStream("/Images/bomb.png"));
+            icon.setImage(img);
+        } catch (Exception ignored) {}
+
+        // Determine result: Victory / Defeat
+        String resultText = isVictory(game) ? "Victory" : "Defeat";
+        Label resultLabel = new Label(resultText);
+        resultLabel.setStyle("-fx-text-fill: #FFFFFF;");
+        resultLabel.setFont(new javafx.scene.text.Font(14));
+
+        // Date and time
+        String dateTimeStr = game.getStartTime().format(DATE_TIME_FORMATTER);
+        Label dateLabel = new Label(dateTimeStr);
+        dateLabel.setStyle("-fx-text-fill: #9ba3c7;");
+
+        VBox leftTextBox = new VBox(2, resultLabel, dateLabel);
+
+        // Spacer pushes right elements to the far right
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Difficulty label
+        Label difficultyLabel = new Label(game.getDifficulty());
+        difficultyLabel.setStyle(
+                "-fx-text-fill: #9ba3c7; -fx-padding: 4 8 4 8; " +
+                "-fx-background-color: #222b44; -fx-background-radius: 10;");
+        difficultyLabel.setFont(new javafx.scene.text.Font(12));
+
+        // Duration label
+        String durationStr = formatDuration(game.getDurationSeconds());
+        Label durationLabel = new Label(durationStr);
+        durationLabel.setStyle("-fx-text-fill: #9ba3c7;");
+        durationLabel.setFont(new javafx.scene.text.Font(12));
+
+        HBox rightBox = new HBox(10, difficultyLabel, durationLabel);
+        rightBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+
+        row.getChildren().addAll(icon, leftTextBox, spacer, rightBox);
+        return row;
+    }
+
+    /**
+     * Determines whether a game is a victory.
+     * Simple rule: score > 0 = win.
+     */
+    private boolean isVictory(GameSummary game) {
+        try {
+            return Integer.parseInt(game.getScore()) > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /* ========= CLEAR HISTORY ========= */
+
+    /**
+     * Clears the CSV file and UI content for history.
+     */
+    private void handleClearHistory() {
+        resultsController.resetGameHistory();
+        gamesListContainer.getChildren().clear();
+
+        totalGamesValueLabel.setText("0");
+        victoriesValueLabel.setText("0");
+        winRateValueLabel.setText("0.0%");
+        bestTimeValueLabel.setText("-");
+    }
+
+    /* ========= NAVIGATION ========= */
+
+    /**
+     * Returns user to the main menu screen.
      */
     private void handleBackToMenu(MouseEvent event) {
         switchScene((Node) event.getSource(), "/View/MainWindow.fxml");
     }
 
     /**
-     * Switches from the current screen to another FXML screen.
+     * Switches between FXML scenes.
      */
     private void switchScene(Node source, String fxmlPath) {
         try {
