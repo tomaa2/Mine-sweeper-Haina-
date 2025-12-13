@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import com.opencsv.CSVReader;
 
@@ -17,9 +18,11 @@ public class SysData {
 	private final List<GameSummary> games;
 	
 	
+	
 	private SysData() {
 		this.questions= new ArrayList<>();
 		this.games=new ArrayList<>();
+		loadQuestionsFromCsv();
 	}
 	
 	// Get Singleton instance
@@ -57,6 +60,45 @@ public class SysData {
      *
      * @return true if added successfully, false if the question already exists.
      */
+    
+    private void loadQuestionsFromCsv() {
+    	questions.clear();
+    	
+    	try (CSVReader reader = new CSVReader(new FileReader("src/questions.csv"))) {
+    		String[] line;
+
+            // Skip header
+            reader.readNext();
+            while ((line = reader.readNext()) != null) {
+            	if (line.length < 8)
+                    continue; // Skip invalid row
+
+                String questionText = line[1].trim();
+                String difficulty = line[2].trim();
+
+                List<String> answers = new ArrayList<>();
+                answers.add(line[3].trim());
+                answers.add(line[4].trim());
+                answers.add(line[5].trim());
+                answers.add(line[6].trim());
+
+                String correctAnswer = line[7].trim();
+
+                // Create Question object
+                Question q = new Question(questionText, answers, correctAnswer, difficulty);
+
+                questions.add(q);
+            }
+            System.out.println("Loaded " + questions.size() + " questions into SysData.");
+
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		System.out.println("ERROR: Could not load questions from CSV.");
+
+    	}
+    }
+    
+    
     public boolean addQuestion(Question question) {
         if (question == null) {
             return false;
@@ -105,18 +147,22 @@ public class SysData {
     }
     
     
-    public void setQuestions(List<Question> questions) {
-    	questions.clear();
-    	questions.addAll(questions);
+    public void setQuestions(List<Question> newQuestions) {
+    	this.questions.clear();
+    	if(newQuestions != null) {
+    		this.questions.addAll(newQuestions);
+    	}
     }
     
     //remove a question
     public boolean deleteQuestion(String ques) {
-    	if(ques!=null) {
-    		return questions.removeIf(q -> q.getQuestion().equalsIgnoreCase(ques));
-    	}
-    	return false;
+    	if (ques == null) return false;
+
+        return questions.removeIf(q -> {
+            return q.getQuestion().trim().equalsIgnoreCase(ques.trim());
+        });
     }
+    
     
     //edit question
     public boolean editQuestion(String oldQues, Question newQues) {
@@ -144,13 +190,31 @@ public class SysData {
     
     
     //get Random question for question cell
-    public Question getRandomQuestion() {
-    	if(questions.isEmpty())
-    		return null;
+    public Question getRandomQuestion(Set<String> usedQuestions) {	
+    	List<Question> available = new ArrayList<>();
     	
+    	if(questions.isEmpty()) {
+    		System.out.println("SysData.getRandomQuestion(): QUESTIONS LIST EMPTY!");
+    		return null;
+    	}
+    	
+    	for (Question q : questions) {
+            if (!usedQuestions.contains(q.getQuestion())) {
+                available.add(q);
+            }
+        }
+
+        if (available.isEmpty()) {
+            System.out.println("No unused questions available!");
+            return null;
+        }
+    	
+    	//System.out.println("SysData.getRandomQuestion(): size = " + available.size());
     	Random rand = new Random();
-    	return questions.get(rand.nextInt(questions.size()));
+    	return available.get(rand.nextInt(available.size()));
     }
+    
+    
     /*---------------------------------------------game methods------------------------------------------*/
     
     //add new game
@@ -186,6 +250,12 @@ public class SysData {
     	return Collections.unmodifiableList(games);
     }
     
-    
+    public void debugPrintQuestions() {
+        System.out.println("===== SysData QUESTIONS =====");
+        for (Question q : questions) {
+            System.out.println("[" + q.getQuestion() + "]");
+        }
+        System.out.println("===== END =====");
+    }
 	
 }

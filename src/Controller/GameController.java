@@ -6,6 +6,8 @@ import Model.GameSummary;
 import Model.Player;
 import Model.Question;
 import Model.SysData;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import Model.Board;
 import Model.Cell;
 import Model.CellType;
@@ -13,8 +15,10 @@ import Model.CellType;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class GameController {
 	private final Game game; // the game instance
@@ -24,6 +28,8 @@ public class GameController {
 	private final GameResultsController gameResultsController; // variable for handeling and saving game result
 	private final SysData sysData; // Access to the questions database
 	private boolean resultSaved = false;   // if  we saved the game results
+	private final Set<String> usedQuestions = new HashSet<>(); //for storing the questions, for not getting the same question twice in a game//
+	
 	public GameController(String name1, String name2, GameConfig config) {
 		Player player1 = new Player(name1);
 		Player player2 = new Player(name2);
@@ -38,6 +44,7 @@ public class GameController {
 		player1.setTurn(true);
 		player2.setTurn(false);
 		this.currentPlayer = game.getPlayer1();
+		usedQuestions.clear();//for each game
 	}
 
 	// switch turn between players
@@ -88,13 +95,22 @@ public class GameController {
 		if (type == CellType.EMPTY)
 			handleEmptyCell(board, row, col);
 		else {
-			cell.setRevealed(true);
+			//cell.setRevealed(true);
 			switch (cell.getCellType()) {
-			case MINE -> handleMineCell();
-			case EMPTY -> handleEmptyCell(board, row, col);
-			case NUMBER -> handleNumberCell();
-			case QUESTION -> handleQuestionCell();
-			case SURPRISE -> handleSurpriseCell();
+			case MINE -> {
+				cell.setRevealed(true);
+				handleMineCell();
+				}
+			case EMPTY -> {
+				cell.setRevealed(true);
+				handleEmptyCell(board, row, col);
+				}
+			case NUMBER -> {
+				cell.setRevealed(true);
+				handleNumberCell();
+				}
+			case QUESTION -> handleQuestionCell(cell);
+			case SURPRISE -> handleSurpriseCell(cell);
 			}
 		}
 		checkGameEnd();
@@ -117,15 +133,38 @@ public class GameController {
 		switchTurn();
 	}
 
-	private void handleQuestionCell() {
+	private void handleQuestionCell(Cell cell) {
 		// revealing question cell just reveals it, activation is separate
 		// player can activate it later for a cost
-		switchTurn();
+		if(!cell.isRevealed() && !cell.isUsed()) {
+			cell.setRevealed(true);
+			switchTurn();
+		}
+//		else {
+//			Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//	        alert.setTitle("Activate Question");
+//	        alert.setHeaderText("Are you sure you want to activate this question cell?");
+//	        
+//	        alert.showAndWait().ifPresent(result -> {
+//	            if (result == ButtonType.OK) {
+//	                boolean success;
+//	                if (success) {
+//	                    return;
+//	                } else {
+//	                    showError("Failed to activate question. It may not exist.");
+//	                }
+//	            }
+//	        });
+//			//activateQuestionCell(cell);
+//		}
 	}
 
-	private void handleSurpriseCell() {
+	private void handleSurpriseCell(Cell cell) {
 		// revealing surprise cell just reveals it, activation is separate
-		switchTurn();
+		if(!cell.isRevealed() && !cell.isUsed()) {
+			cell.setRevealed(true);
+			switchTurn();
+		}
 	}
 
 	// ------------------------------------ flagging a
@@ -168,7 +207,7 @@ public class GameController {
 			return true;
 		}
 
-		// check if all non mine cells are revealed on at least one board
+		// check if all mine cells are revealed on at least one board
 		if (checkBoardCleared(game.getBoard1()) || checkBoardCleared(game.getBoard2())) {
 			endGame();
 			return true;
@@ -236,25 +275,32 @@ public class GameController {
 
 	// ---------------------------------------activating
 	// cells-----------------------------------------//
-	public Question activateQuestionCell(int playerIndex, int row, int col) {
-		Board board = getBoardByIndex(playerIndex);
-		Cell cell = board.getCell(row, col);
+	public Question activateQuestionCell(Cell cell) {
+		//Board board = getBoardByIndex(playerIndex);
+		//Cell cell = board.getCell(row, col);
 
 		if (cell == null || !cell.isRevealed() || cell.isUsed() || cell.getCellType() != CellType.QUESTION) {
 			return null;
-		}
-
+		}		
 		cell.setUsed(true);
 
 		// pay the activation cost
 		int activationCost = game.getConfig().getActivationCost();
 		game.modifyScore(-activationCost);
-
-		return sysData.getRandomQuestion();
+		
+		
+		Question q = sysData.getRandomQuestion(usedQuestions);
+		if(q!=null) {
+			usedQuestions.add(q.getQuestion());
+		}
+			
+		
+	    return q;
 	}
 
 	public void applyAnswer(Question question, String playerAnswer) {
 		boolean correct = playerAnswer.equalsIgnoreCase(question.getCorrectAnswer());
+		//System.out.println(correct);
 		GameConfig config = game.getConfig();
 		String qLevel = question.getDifficulty();
 		Random rand = new Random();
@@ -264,7 +310,8 @@ public class GameController {
 
 		// apply rewards/penalties based on game difficulty and question level
 		applyQuestionOutcome(gameLevel, qLevel, correct, rand);
-
+		
+		
 		checkGameEnd();
 		switchTurn();
 	}
@@ -446,9 +493,9 @@ public class GameController {
 		}
 	}
 
-	public void activateSurpriseCell(int playerIndex, int row, int col) {
-		Board board = getBoardByIndex(playerIndex);
-		Cell cell = board.getCell(row, col);
+	public void activateSurpriseCell(Cell cell) {
+		//Board board = getBoardByIndex(playerIndex);
+		//Cell cell = board.getCell(row, col);
 
 		if (cell == null || !cell.isRevealed() || cell.isUsed() || cell.getCellType() != CellType.SURPRISE) {
 			return;
@@ -477,6 +524,7 @@ public class GameController {
 		}
 
 		checkGameEnd();
+		switchTurn();
 	}
 
 	////////////////// /more actions
