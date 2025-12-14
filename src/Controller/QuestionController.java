@@ -220,14 +220,14 @@ public class QuestionController {
                         continue;
                     }
 
-                    String questionText       = line[1];
-                    String questionDifficulty = line[2];
+                    String questionText       = line[1].trim();
+                    String questionDifficulty = line[2].trim();
 
                     List<String> answers = new ArrayList<>();
-                    answers.add(line[3]);
-                    answers.add(line[4]);
-                    answers.add(line[5]);
-                    answers.add(line[6]);
+                    answers.add(line[3].trim());
+                    answers.add(line[4].trim());
+                    answers.add(line[5].trim());
+                    answers.add(line[6].trim());
 
                     String correctAnswer = line[7];
 
@@ -311,15 +311,30 @@ public class QuestionController {
         filteredData.setPredicate(q -> {
             boolean matchesText = (searchText == null || searchText.isBlank())
                     || q.getQuestion().toLowerCase().contains(searchText.toLowerCase());
+            
+            String mappedDifficulty = mapDifficultyToNumber(questionDiffFilter);
+            boolean matchesDifficulty = (mappedDifficulty == null)  // means "All Question Difficulties"
+                    || q.getQuestionDifficulty().equals(mappedDifficulty);
+                    
 
-            boolean matchesQuestionDiff = (questionDiffFilter == null
-                    || questionDiffFilter.toLowerCase().startsWith("all"))
-                    || q.getQuestionDifficulty().equalsIgnoreCase(questionDiffFilter);
-
-            return matchesText && matchesQuestionDiff;
+            return matchesText && matchesDifficulty;
         });
 
         updateCounters();
+    }
+
+    
+    //function for mapping difficulty text into numbers (EASY->1 , MEDUIM->2, HARD->3, EXPERT->4)
+    private String mapDifficultyToNumber(String diff) {
+        if (diff == null) return null;
+
+        return switch (diff.toUpperCase()) {
+            case "EASY"   -> "1";
+            case "MEDIUM" -> "2";
+            case "HARD"   -> "3";
+            case "EXPERT" -> "4";
+            default -> null; // "All Question Difficulties"
+        };
     }
 
     /**
@@ -334,13 +349,13 @@ public class QuestionController {
         int total = filteredData.size();
 
         long easy   = filteredData.stream()
-                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("EASY")).count();
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("1")).count();
         long medium = filteredData.stream()
-                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("MEDIUM")).count();
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("2")).count();
         long hard   = filteredData.stream()
-                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("HARD")).count();
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("3")).count();
         long expert = filteredData.stream()
-                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("EXPERT")).count();
+                .filter(q -> q.getQuestionDifficulty().equalsIgnoreCase("4")).count();
 
         if (totalQuestionsValueLabel != null) {
             totalQuestionsValueLabel.setText(String.valueOf(total));
@@ -427,7 +442,7 @@ public class QuestionController {
         if (question == null) {
             return;
         }
-
+        
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Question");
         alert.setHeaderText("Are you sure you want to delete this question?");
@@ -592,9 +607,10 @@ public class QuestionController {
                 if (questionDiff == null || questionDiff.isBlank()) {
                     questionDiff = "EASY";
                 }
+                String difficultyNumber = mapDifficultyToNumber(questionDiff);
 
                 List<String> answers = List.of(aA, aB, aC, aD);
-                return new Question(qText, answers, correctAnswer, questionDiff);
+                return new Question(qText, answers, correctAnswer, difficultyNumber);
             }
             return null;
         });
@@ -612,4 +628,6 @@ public class QuestionController {
         error.setContentText(message);
         error.showAndWait();
     }
+    
+    
 }

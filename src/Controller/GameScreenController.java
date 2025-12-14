@@ -2,7 +2,8 @@ package Controller;
 
 import Model.Board;
 import Model.Cell;
-
+import Model.CellType;
+import Model.Question;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -134,7 +135,9 @@ public class GameScreenController {
         Cell cell = board.getCell(row, col);
         
         //ignore if cell is already revealed or flagged
-        if (cell == null || cell.isRevealed() || cell.isFlagged()) {
+        if (cell == null || 
+        		(cell.isRevealed() && cell.getCellType()!=CellType.QUESTION && cell.getCellType()!=CellType.SURPRISE) ||
+        		cell.isUsed() || cell.isFlagged()) {
             return;
         }
 
@@ -149,8 +152,58 @@ public class GameScreenController {
                 modeButton.setStyle("");
             }
             
-        } else {
+        }
+        if(cell.getCellType() == CellType.QUESTION && cell.isRevealed() && !cell.isUsed()) {
+        	Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Activate Question");
+            confirm.setHeaderText("Do you want to activate this question cell?");
+            confirm.setContentText("This will cost points.");
+            confirm.showAndWait().ifPresent(result -> {
+                if (result == ButtonType.OK) {
+                	 updateUI();
+                    // Activate the question → marks used + deduct cost + returns random question
+                    Question q = gameController.activateQuestionCell(cell);
+                    //System.out.println(q);
+
+                    if (q != null) {
+                        showQuestionPopup(cell, q);  // Show the MCQ popup
+                    }
+
+                    updateUI();
+
+                    if (gameController.checkGameEnd()) {
+                        showGameOver();
+                    }
+                }
+            });
+        }
+        if(cell.getCellType() == CellType.SURPRISE && cell.isRevealed() && !cell.isUsed()) {
+        	Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Activate Surprise");
+            confirm.setHeaderText("Do you want to activate this surprise cell?");
+            confirm.setContentText("This will cost points.");
+            confirm.showAndWait().ifPresent(result -> {
+            	if(result == ButtonType.OK) {
+            		updateUI();
+            		gameController.activateSurpriseCell(cell);
+            		updateUI();
+            		
+            		if (gameController.checkGameEnd()) {
+                        showGameOver();
+                    }
+            		
+            	}
+            });
+        }
+        
+        else {
             gameController.revealCell(playerIndex, row, col);
+          
+//            Cell clicked = cell; // use the one you already retrieved
+//            if (clicked.getCellType() == CellType.QUESTION && clicked.isRevealed() && !clicked.isUsed()) {
+//                showQuestionPopup(playerIndex, row, col);
+//               
+//            }
         }
         
         updateUI();
@@ -159,6 +212,40 @@ public class GameScreenController {
             showGameOver();
         }
     }
+    
+    private void showQuestionPopup(Cell cell, Question q) {
+        //Question q = gameController.activateQuestionCell(cell);
+        if (q == null) {
+        	showError("Could not load question.");
+            return; // invalid or already used
+        }
+
+        Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle("Question Cell");
+        alert.setHeaderText(q.getQuestion());
+
+        ButtonType aBtn = new ButtonType(q.getAnswers().get(0));
+        ButtonType bBtn = new ButtonType(q.getAnswers().get(1));
+        ButtonType cBtn = new ButtonType(q.getAnswers().get(2));
+        ButtonType dBtn = new ButtonType(q.getAnswers().get(3));
+
+        alert.getButtonTypes().setAll(aBtn, bBtn, cBtn, dBtn);
+
+        alert.showAndWait().ifPresent(choice -> {
+            String answer = null;
+            if (choice == aBtn) answer = "A";
+            if (choice == bBtn) answer = "B";
+            if (choice == cBtn) answer = "C";
+            if (choice == dBtn) answer = "D";
+            gameController.applyAnswer(q, answer);
+            updateUI();
+
+            if (gameController.checkGameEnd()) {
+                showGameOver();
+            }
+        });
+    }
+
     
     private void setupTimer() {
         startTimeNanos = System.nanoTime();
@@ -406,5 +493,12 @@ public class GameScreenController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private void showError(String message) {
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Error");
+        error.setHeaderText("Operation failed");
+        error.setContentText(message);
+        error.showAndWait();
     }
 }
