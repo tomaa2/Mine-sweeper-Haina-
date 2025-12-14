@@ -1,0 +1,227 @@
+/* Main Background */
+.root {
+    -fx-background-color: #0a0e27;
+}
+
+AnchorPane {
+    -fx-background-color: #0a0e27;
+}
+
+BorderPane {
+    -fx-background-color: transparent;
+}
+
+/* Default Labels */
+Label {
+    -fx-text-fill: white;
+}
+
+/* Top Bar */
+.top HBox {
+    -fx-background-color: #141b3d;
+    -fx-padding: 20 40 10 40;
+}
+
+/* Back to Menu */
+#backToMenuLabel {
+    -fx-text-fill: #00d4ff;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+#backToMenuLabel:hover {
+    -fx-text-fill: #00e6ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.6, 0, 0);
+}
+
+/* Title */
+.top HBox > Label:last-child {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 15, 0.5, 0, 0);
+}
+
+/* Main Card */
+#cardPane {
+    -fx-background-color: #1e2749;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, black, 1, 0.7, 0, 10);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 2;
+    -fx-border-radius: 16;
+}
+
+/* Mode Title */
+#modeTitleLabel {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 1, 0.5, 0, 0);
+}
+
+/* Text Fields */
+TextField {
+    -fx-background-color: #0a0e27;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 12 15;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-prompt-text-fill: #6b7a99;
+}
+
+TextField:focused {
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 5, 0.2, 0, 0);
+}
+
+#player1Field:focused {
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.6, 0, 0);
+}
+
+#player2Field:focused {
+    -fx-border-color: #ff3366;
+    -fx-effect: dropshadow(gaussian, #ff3366, 10, 0.6, 0, 0);
+}
+
+/* Difficulty Buttons */
+#easyButton,
+#mediumButton,
+#hardButton {
+    -fx-background-color: #141b3d;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 5;
+    -fx-cursor: hand;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+}
+
+#easyButton {
+    -fx-border-color: #00ff88;
+}
+
+#easyButton:hover {
+    -fx-background-color: rgba(0, 255, 136, 0.1);
+    -fx-effect: dropshadow(gaussian, #00ff88, 15, 0.6, 0, 3);
+}
+
+#easyButton.selected {
+    -fx-background-color: #00ff88;
+    -fx-text-fill: #1a1f3a;
+    -fx-effect: dropshadow(gaussian, #00ff88, 5, 0.8, 0, 5);
+}
+
+#mediumButton {
+    -fx-border-color: #ffd900;
+}
+
+#mediumButton:hover {
+    -fx-background-color: rgba(255, 217, 0, 0.1);
+    -fx-effect: dropshadow(gaussian, #ffd900, 5, 0.6, 0, 3);
+}
+
+#mediumButton.selected {
+    -fx-background-color: rgba(255, 217, 0, 0.1);  /* Same as hover */
+    -fx-text-fill: #ffd900;                           /* Keep text white */
+    -fx-effect: dropshadow(gaussian, #ffd900, 5, 0.6, 0, 3);  /* Same as hover */
+}
+
+#hardButton {
+    -fx-border-color: #ff3366;
+}
+
+#hardButton:hover {
+    -fx-background-color: rgba(255, 51, 102, 0.1);
+    -fx-effect: dropshadow(gaussian, #ff3366, 8, 0.3, 0, 3);
+}
+
+#hardButton.selected {
+    -fx-background-color: #ff3366;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, #ff3366, 8, 0.3, 0, 5);
+}
+
+/* Rules Box */
+#rulesBox {
+    -fx-background-color: #0a0e27;
+    -fx-background-radius: 10;
+    -fx-padding: 16;
+    -fx-border-color: rgba(0, 212, 255, 0.3);
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+}
+
+#rulesTitleLabel {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00d4ff;
+}
+
+#rulesBodyLabel {
+    -fx-font-size: 14px;
+    -fx-text-fill: #b8c5db;
+}
+
+/* Start Game Button */
+#startGameButton {
+    -fx-background-color: #00d4ff;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-padding: 15 40;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 5, 0.5, 0, 5);
+}
+
+#startGameButton:hover {
+    -fx-background-color: #00e6ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 5, 0.5, 0, 5);
+}
+
+#startGameButton:disabled {
+    -fx-background-color: #141b3d;
+    -fx-text-fill: #6b7a99;
+    -fx-opacity: 0.5;
+    -fx-effect: none;
+}
+
+/* Help Button */
+#helpButton {
+    -fx-background-color: #b14aff;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 0.5 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #b14aff, 15, 0.6, 0, 3);
+}
+
+#helpButton:hover {
+    -fx-background-color: #c44aff;
+    -fx-effect: dropshadow(gaussian, #b14aff, 3, 0.2, 0, 1);
+}
+
+/* Image Glow */
+ImageView {
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.5, 0, 0);
+}
+
+/* Region Spacer */
+Region {
+    -fx-background-color: transparent;
+}
+
+
+
+
+
+

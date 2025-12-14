@@ -219,8 +219,11 @@ public class GameScreenController {
     }
 
     private void updateCellButton(Button btn, Cell cell) {
-        String baseStyle = "-fx-font-size: 12px; -fx-padding: 0; -fx-border-color: #999999;";
+    	
+    	String baseStyle = "-fx-font-size: 12px; -fx-padding: 0; -fx-border-color: #999999;";
         if (cell.isRevealed()) {
+            btn.getStyleClass().add("cell-revealed");
+
             switch (cell.getCellType()) {
                 case MINE -> {
                     btn.setText("💣");
@@ -232,7 +235,7 @@ public class GameScreenController {
                 }
                 case EMPTY -> {
                     btn.setText("");
-                    btn.setStyle(baseStyle + "-fx-background-color: #e0e0e0;");
+                    btn.setStyle(baseStyle + "-fx-background-color: #ffffff;");
                 }
                 case QUESTION -> {
                     btn.setText(cell.isUsed() ? "✓" : "❓");

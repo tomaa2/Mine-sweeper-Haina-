@@ -1,0 +1,245 @@
+
+
+/* Import Modern Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
+
+/* ============================================
+   ROOT & BASE STYLES
+   ============================================ */
+.root {
+    /* Color Palette */
+    -fx-bg-dark: #0a0e27;
+    -fx-bg-medium: #141b3d;
+    -fx-bg-light: #1e2749;
+    
+    -fx-accent-cyan: #00d4ff;
+    -fx-accent-purple: #b14aff;
+    -fx-accent-green: #00ff88;
+    -fx-accent-red: #ff3366;
+    -fx-accent-yellow: #ffd900;
+    -fx-accent-orange: #ff6b35;
+    
+    -fx-text-white: #ffffff;
+    -fx-text-light: #b8c5db;
+    -fx-text-dim: #6b7a99;
+}
+
+/* ============================================
+   MAIN CONTAINER BACKGROUND
+   ============================================ */
+AnchorPane {
+    -fx-background-color: linear-gradient(to bottom right, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+}
+
+BorderPane {
+    -fx-background-color: transparent;
+}
+
+/* ============================================
+   HEADER SECTION (TOP)
+   ============================================ */
+VBox {
+    -fx-background-color: transparent;
+}
+
+/* Title Styling */
+.root Label {
+    -fx-text-fill: #ffffff;
+}
+
+/* Main Title "MINE SWEEPER" */
+BorderPane > .top VBox > HBox > Label {
+    -fx-font-family: 'Orbitron', 'Arial Black', sans-serif;
+    -fx-font-size: 48px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.6), 25, 0.8, 0, 0);
+    -fx-letter-spacing: 0.05em;
+}
+
+/* Subtitle "Classic game, modern experience" */
+BorderPane > .top VBox > Label {
+    -fx-font-family: 'Exo 2', 'Segoe UI', sans-serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #b8c5db;
+    -fx-letter-spacing: 0.03em;
+}
+
+/* Two-Player Battle Mode text */
+BorderPane > .top VBox > Label:last-child {
+    -fx-font-family: 'Exo 2', sans-serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #00d4ff;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.08em;
+}
+
+/* Bomb Icon */
+BorderPane > .top VBox > HBox > ImageView {
+    -fx-effect: dropshadow(gaussian, rgba(255, 51, 102, 0.6), 20, 0.7, 0, 0);
+}
+
+/* ============================================
+   CARD CONTAINERS (CENTER)
+   ============================================ */
+.center HBox {
+    -fx-background-color: transparent;
+}
+
+/* Individual Card VBox */
+.center HBox > VBox {
+    -fx-background-color: #1e2749;
+    -fx-background-radius: 16px;
+    -fx-padding: 40 35 40 35;
+    -fx-spacing: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 25, 0.7, 0, 10);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 2;
+    -fx-border-radius: 16px;
+    -fx-min-width: 280px;
+    -fx-max-width: 280px;
+    -fx-cursor: hand;
+}
+
+/* Card Hover Effect */
+.center HBox > VBox:hover {
+    -fx-background-color: #2a3562;
+    -fx-border-color: rgba(0, 212, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.4), 30, 0.8, 0, 10);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+/* Card Icons */
+.center HBox > VBox > ImageView {
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.4), 15, 0.6, 0, 0);
+}
+
+/* Card Title Labels */
+.center HBox > VBox > Label:nth-child(2) {
+    -fx-font-family: 'Orbitron', 'Arial Black', sans-serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #ffffff;
+    -fx-letter-spacing: 0.02em;
+}
+
+/* Card Description Labels */
+.center HBox > VBox > Label:nth-child(3) {
+    -fx-font-family: 'Exo 2', 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #b8c5db;
+    -fx-wrap-text: true;
+}
+
+/* ============================================
+   BUTTONS - JavaFX Compatible Gradients
+   ============================================ */
+Button {
+    -fx-font-family: 'Exo 2', 'Segoe UI', sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 12 40;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+/* New Game Button (Green) */
+#newGameButton {
+    -fx-background-color: linear-gradient(to bottom, #00ff88 0%, #00cc66 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 136, 0.5), 5, 0.6, 0, 5);
+}
+
+#newGameButton:hover {
+    -fx-background-color: linear-gradient(to bottom, #00ff99 0%, #00dd77 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 255, 136, 0.7), 5, 0.8, 0, 5);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+#newGameButton:pressed {
+    -fx-background-color: linear-gradient(to bottom, #00dd77 0%, #00aa55 100%);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* Game History Button (Cyan) */
+#gameHistoryButton {
+    -fx-background-color: linear-gradient(to bottom, #00d4ff 0%, #0099cc 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.5), 5, 0.6, 0, 5);
+}
+
+#gameHistoryButton:hover {
+    -fx-background-color: linear-gradient(to bottom, #00e6ff 0%, #00aadd 100%);
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.7), 5, 0.8, 0, 5);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+#gameHistoryButton:pressed {
+    -fx-background-color: linear-gradient(to bottom, #00aac7 0%, #007799 100%);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* Question Bank Button (Purple) */
+#questionBankButton {
+    -fx-background-color: linear-gradient(to bottom, #b14aff 0%, #8800cc 100%);
+    -fx-effect: dropshadow(gaussian, rgba(177, 74, 255, 0.5), 5, 0.6, 0, 5);
+}
+
+#questionBankButton:hover {
+    -fx-background-color: linear-gradient(to bottom, #c44aff 0%, #9900dd 100%);
+    -fx-effect: dropshadow(gaussian, rgba(177, 74, 255, 0.7), 5, 0.8, 0, 5);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+#questionBankButton:pressed {
+    -fx-background-color: linear-gradient(to bottom, #9000cc 0%, #6600aa 100%);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* ============================================
+   FOOTER FEATURES
+   ============================================ */
+.bottom HBox Label {
+    -fx-font-family: 'Exo 2', sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7a99;
+    -fx-font-weight: 400;
+}
+
+/* Feature items in footer */
+VBox > HBox > HBox Label {
+    -fx-font-family: 'Exo 2', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #b8c5db;
+    -fx-font-weight: 500;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(0, 212, 255, 0.3);
+    -fx-background-radius: 10px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: rgba(0, 212, 255, 0.5);
+}
+
+.scroll-bar .track {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 10px;
+}

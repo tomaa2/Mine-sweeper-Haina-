@@ -1,0 +1,351 @@
+
+/* ============================================
+   MAIN BACKGROUND
+   ============================================ */
+.root {
+    -fx-background-color: #0a0e27;
+}
+
+AnchorPane {
+    -fx-background-color: #0a0e27;
+}
+
+BorderPane {
+    -fx-background-color: transparent;
+}
+
+/* ============================================
+   DEFAULT LABEL STYLING
+   ============================================ */
+Label {
+    -fx-text-fill: white;
+}
+
+/* ============================================
+   TOP BAR STYLING
+   ============================================ */
+.top VBox {
+    -fx-background-color: #141b3d;
+    -fx-padding: 15 30 10 30;
+}
+
+/* Back to Menu Label */
+#backToMenuLabel {
+    -fx-text-fill: #00d4ff;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+#backToMenuLabel:hover {
+    -fx-text-fill: #00e6ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 10, 0.6, 0, 0);
+}
+
+/* Game Title */
+.top HBox > Label:nth-child(3) {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 15, 0.5, 0, 0);
+}
+
+/* New Game Button in Top Bar */
+#newGameButton {
+    -fx-background-color: #00ff88;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #00ff88, 3, 0.5, 0, 3);
+}
+
+#newGameButton:hover {
+    -fx-background-color: #00ff99;
+    -fx-effect: dropshadow(gaussian, #00ff88, 3, 0.7, 0, 3);
+}
+
+#newGameButton:pressed {
+    -fx-background-color: #00dd77;
+}
+
+/* Status Bar Labels */
+#turnLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: #b8c5db;
+}
+
+#livesLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ff3366;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, #ff3366, 0.65, 0.5, 0, 0);
+}
+
+.top HBox > HBox > Label:first-child {
+    -fx-text-fill: #b8c5db;
+    -fx-font-size: 16px;
+}
+
+#currentPlayerLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffd900;
+    -fx-font-weight: bold;
+}
+
+#scoreLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ffd900;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, #ffd900, 0.65, 0.5, 0, 0);
+}
+
+/* Mode Button (Reveal/Flag) */
+#modeButton {
+    -fx-background-color: #b14aff;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #b14aff, 5, 0.5, 0, 3);
+}
+
+#modeButton:hover {
+    -fx-background-color: #c44aff;
+    -fx-effect: dropshadow(gaussian, #b14aff, 5, 0.7, 0, 3);
+}
+
+#modeButton:pressed {
+    -fx-background-color: #9000cc;
+}
+
+/* ============================================
+   CENTER - PLAYER BOARDS AREA
+   ============================================ */
+.center HBox {
+    -fx-background-color: transparent;
+    -fx-spacing: 20;
+    -fx-padding: 20;
+}
+
+/* ============================================
+   PLAYER PANELS (VBox containers)
+   ============================================ */
+.center > HBox > VBox {
+    -fx-background-color: #1e2749;
+    -fx-background-radius: 12;
+    -fx-padding: 20;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, black, 20, 0.6, 0, 8);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+}
+
+/* Player 1 Panel - Cyan border */
+.center > HBox > VBox:nth-child(1) {
+    -fx-border-color: #00d4ff;
+}
+
+/* Player 2 Panel - Pink/Red border */
+.center > HBox > VBox:nth-child(2) {
+    -fx-border-color: #ff3366;
+}
+
+/* ============================================
+   PLAYER HEADERS
+   ============================================ */
+/* Player name labels */
+#player1NameLabel {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 1, 0.1, 0, 0);
+}
+
+#player2NameLabel {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff3366;
+    -fx-effect: dropshadow(gaussian, #ff3366, 1, 0.1, 0, 0);
+}
+
+/* Player status dots */
+.center VBox > HBox > Label:first-child {
+    -fx-font-size: 20px;
+    -fx-text-fill: #00ff88;
+}
+
+/* Flag counter labels */
+#player1FlagsLabel,
+#player2FlagsLabel {
+    -fx-font-size: 14px;
+    -fx-text-fill: #b8c5db;
+}
+
+/* ============================================
+   GAME GRID (BOARD) STYLING
+   ============================================ */
+GridPane {
+    -fx-background-color: #0a0e27;
+    -fx-background-radius: 8;
+    -fx-padding: 5;
+    -fx-hgap: 2;
+    -fx-vgap: 2;
+}
+
+/* ============================================
+   CELL BUTTONS (Added dynamically in Java)
+   These styles will apply to buttons added to the grid
+   ============================================ */
+.cell-button {
+    -fx-background-color: #1e2749;
+    -fx-background-radius: 3;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-min-width: 35px;
+    -fx-min-height: 35px;
+    -fx-max-width: 35px;
+    -fx-max-height: 35px;
+}
+
+.cell-button:hover {
+    -fx-background-color: #2a3562;
+    -fx-border-color: rgba(0, 212, 255, 0.5);
+    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.5, 0, 0);
+}
+
+.cell-button:pressed {
+    -fx-background-color: #141b3d;
+}
+
+/* Revealed cell */
+.cell-revealed {
+    -fx-background-color: white;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-cursor: default;
+}
+
+.cell-revealed:hover {
+    -fx-background-color: white;
+    -fx-effect: none;
+}
+
+.cell-empty-revealed {
+    -fx-background-color: #e9edf5;  /* light gray */
+    -fx-border-color: rgba(0, 0, 0, 0.10);
+    -fx-text-fill: transparent;
+    -fx-cursor: default;
+}
+/* Cell with mine */
+.cell-mine {
+    -fx-background-color: #ff3366;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-effect: dropshadow(gaussian, #ff3366, 12, 0.7, 0, 0);
+}
+
+/* Cell with flag */
+.cell-flagged {
+    -fx-background-color: #ffd900;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(gaussian, #ffd900, 12, 0.7, 0, 0);
+}
+
+/* Number cells - different colors for each number */
+.cell-1 { -fx-text-fill: #00d4ff; }
+.cell-2 { -fx-text-fill: #00ff88; }
+.cell-3 { -fx-text-fill: #ffd900; }
+.cell-4 { -fx-text-fill: #ff6b35; }
+.cell-5 { -fx-text-fill: #ff3366; }
+.cell-6 { -fx-text-fill: #b14aff; }
+.cell-7 { -fx-text-fill: #ff1493; }
+.cell-8 { -fx-text-fill: #ff0000; }
+
+/* Question cell */
+.cell-question {
+    -fx-background-color: #00ff88;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-effect: dropshadow(gaussian, #00ff88, 12, 0.7, 0, 0);
+}
+
+/* Surprise cell */
+.cell-surprise {
+    -fx-background-color: #b14aff;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(gaussian, #b14aff, 12, 0.7, 0, 0);
+}
+
+/* Used special cell */
+.cell-used {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* Empty/safe cell */
+.cell-empty {
+    -fx-background-color: #0a0e27;
+    -fx-border-color: rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================
+   REGION (Spacer)
+   ============================================ */
+Region {
+    -fx-background-color: transparent;
+}
+
+/*
+   SCROLLBAR 
+   */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(0, 212, 255, 0.3);
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: rgba(0, 212, 255, 0.5);
+}
+
+.scroll-bar .track {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 10;
+}
+
+/*   ACTIVE PLAYER HIGHLIGHT
+ You can add this class dynamically in Java to highlight active player */
+.active-player {
+    -fx-border-color: #00ff88 !important;
+    -fx-border-width: 3 !important;
+    -fx-effect: dropshadow(gaussian, #00ff88, 25, 0.8, 0, 0);
+}
+
+/* ============================================
+   ANIMATION CLASSES (Optional - add in Java)
+   ============================================ */
+.pulse {
+    -fx-effect: dropshadow(gaussian, #00d4ff, 20, 0.8, 0, 0);
+}
+
+.shake {
+}
+
+
+
+
