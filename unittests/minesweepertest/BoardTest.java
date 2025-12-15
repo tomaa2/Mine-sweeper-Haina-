@@ -1,11 +1,14 @@
-package Model;
+package minesweepertest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
 import Controller.GameController;
-
+import Model.Board;
+import Model.GameConfig;
+import Model.Player;
+//Toma
 class BoardTest {
 
 	@Test
