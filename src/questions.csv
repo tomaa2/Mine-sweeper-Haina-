@@ -18,4 +18,4 @@ ID,Question,Difficulty,A,B,C,D,Correct Answer
 17,Which SRS characteristic requires requirements to be unambiguous?,4,Size,Scope,Clarity,Value,C
 18,what is the primary goal of unit testing ?,3,To test the entire system end-to-end,To measure system performance under heavy load,To evaluate how different modules interact together,To verify that individual components or functions work correctly in isolation,D
 19,Which non-functional requirement describes how fast the system should respond?,3,Usablity,Performance,Reliability,Security,B
-20,"Which software engineering concept ensures that each module has a single, well-defined responsibility?",4,Cohesion,Coupling,Encapsulation,Composition,
+20,"Which software engineering concept ensures that each module has a single, well-defined responsibility?",4,Cohesion,Coupling,Encapsulation,Composition,A
