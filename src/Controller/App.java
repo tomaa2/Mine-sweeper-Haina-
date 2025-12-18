@@ -16,6 +16,8 @@ public class App extends Application {
                     new FXMLLoader(getClass().getResource("/View/MainWindow.fxml"));
             Parent root = loader.load();
 
+
+
             Scene scene = new Scene(root );
             primaryStage.setTitle("Mine Sweeper");
             primaryStage.setScene(scene);
