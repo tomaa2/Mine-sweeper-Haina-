@@ -4,6 +4,7 @@ import Model.Board;
 import Model.Cell;
 import Model.CellType;
 import Model.Question;
+import Model.SoundManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -121,8 +122,10 @@ public class GameScreenController {
 
     private void handleCellClick(MouseEvent event, int playerIndex, int row, int col) {
     	//ignores any click if game is over
-    	if(gameOver)
+    	if(gameOver) {
+    		//SoundManager.playGameOver();
     		return;
+    		}
         // check if its this players turn
         int currentPlayerIndex = gameController.getGame().getCurrentPlayerIndex();
         if (playerIndex != currentPlayerIndex) {
@@ -140,6 +143,8 @@ public class GameScreenController {
         		cell.isUsed() || cell.isFlagged()) {
             return;
         }
+        SoundManager.playClick();
+
 
         //right click or flag mode = flag
         if (event.getButton() == MouseButton.SECONDARY || flagMode) {
