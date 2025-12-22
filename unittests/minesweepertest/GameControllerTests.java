@@ -8,9 +8,7 @@ import Model.Board;
 import Model.Cell;
 import Model.CellType;
 import Model.GameConfig;
-import Model.Player;
 import Model.Question;
-import Model.SysData;
 
 
 class GameControllerTests {

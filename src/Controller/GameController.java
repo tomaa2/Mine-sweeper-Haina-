@@ -589,10 +589,13 @@ public class GameController {
 		String difficultyName = game.getConfig().name();
 
 		GameSummary summary = new GameSummary(game.getPlayer1().getName(), game.getPlayer2().getName(), difficultyName,
-				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime);
+				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, game.getLives() > 0 ? "Victory" : "Defeat");
 
 		gameResultsController.addGameHistory(summary);
 		System.out.println("Game result saved successfully.");
+		System.out.println("lives left: " + game.getLives());
+		System.out.println("game results: " + (game.getLives() > 0 ? "Victory" : "Defeat"));
+		System.out.println("summary results: " + summary.getGameresult());
 	}
 
 	public void saveAndEndGame() {

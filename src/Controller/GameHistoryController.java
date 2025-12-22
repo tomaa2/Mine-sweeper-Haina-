@@ -201,7 +201,10 @@ public class GameHistoryController {
         } catch (Exception ignored) {}
 
         // Determine result: Victory / Defeat
-        String resultText = isVictory(game) ? "Victory" : "Defeat";
+        System.out.println("Game result: " + game.getGameresult());
+        String resultText = game.getGameresult().equalsIgnoreCase("Victory")
+				? "Victory 🏆"
+				: "Defeat 💣";
         Label resultLabel = new Label(resultText);
         resultLabel.setStyle("-fx-text-fill: #FFFFFF;");
         resultLabel.setFont(new javafx.scene.text.Font(14));
@@ -235,18 +238,6 @@ public class GameHistoryController {
 
         row.getChildren().addAll(icon, leftTextBox, spacer, rightBox);
         return row;
-    }
-
-    /**
-     * Determines whether a game is a victory.
-     * Simple rule: score > 0 = win.
-     */
-    private boolean isVictory(GameSummary game) {
-        try {
-            return Integer.parseInt(game.getScore()) > 0;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     /* ========= CLEAR HISTORY ========= */
