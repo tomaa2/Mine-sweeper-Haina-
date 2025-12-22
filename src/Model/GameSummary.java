@@ -11,6 +11,7 @@ public class GameSummary {
 	private long durationSeconds;
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
+	private String gameResult;
 	
 	
 	public GameSummary() {
@@ -19,7 +20,7 @@ public class GameSummary {
 
 
 	public GameSummary(String player1, String player2, String difficulty, String score, long durationSeconds,LocalDateTime startTime,
-			LocalDateTime endTime) {
+			LocalDateTime endTime, String gameResult) {
 		super();
 		this.player1 = player1;
 		this.player2 = player2;
@@ -28,13 +29,16 @@ public class GameSummary {
 		this.durationSeconds = durationSeconds;
 		this.startTime = startTime;
 		this.endTime = endTime;
+		this.gameResult = gameResult;
 	}
 
 
 	public String getPlayer1() {
 		return player1;
 	}
-
+	public String getGameresult() {
+		return gameResult;
+	}
 
 	public void setPlayer1(String player1) {
 		this.player1 = player1;
@@ -92,12 +96,15 @@ public class GameSummary {
 	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
 	}
-
+	
+	public void setgameresult(String gameresult) {
+		this.gameResult = gameresult;
+	}
 
 	@Override
 	public String toString() {
 		return "GameSummary [player1=" + player1 + ", player2=" + player2 + ", difficulty=" + difficulty + ", Score="
-				+ Score + ", durationSeconds=" + durationSeconds + ", endTime=" + endTime + "]";
+				+ Score + ", durationSeconds=" + durationSeconds + ", endTime=" + endTime + ", gameResult=" + gameResult + "]";
 	}
 	
 	

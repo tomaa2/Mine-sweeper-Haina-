@@ -66,7 +66,7 @@ public class QuestionController {
      * Sets the default CSV file path.
      */
     public QuestionController() {
-        this.csvFilePath = "src/questions.csv";
+        this.csvFilePath = "questions.csv";
     }
 
     /**

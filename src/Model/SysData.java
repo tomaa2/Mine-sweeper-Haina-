@@ -61,10 +61,12 @@ public class SysData {
      * @return true if added successfully, false if the question already exists.
      */
     
-    private void loadQuestionsFromCsv() {
+    public void loadQuestionsFromCsv() {
     	questions.clear();
     	
-    	try (CSVReader reader = new CSVReader(new FileReader("src/questions.csv"))) {
+    	
+    	
+    	try (CSVReader reader = new CSVReader(new FileReader("questions.csv"))) {
     		String[] line;
 
             // Skip header
@@ -109,7 +111,7 @@ public class SysData {
         // === 1. Load all existing questions from CSV ===
         List<String[]> csvRows = new ArrayList<>();
 
-        try (CSVReader reader = new CSVReader(new FileReader("src/questions.csv"))) {
+        try (CSVReader reader = new CSVReader(new FileReader("questions.csv"))) {
 
             String[] line;
             reader.readNext(); // skip header
