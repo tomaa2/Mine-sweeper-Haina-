@@ -89,12 +89,6 @@ public class Board {
 			return;
 		}
 		
-	    //stop if its a mine/question/surprise
-	    if (cell.getCellType() == CellType.MINE || 
-	        cell.getCellType() == CellType.QUESTION || 
-	        cell.getCellType() == CellType.SURPRISE) {
-	        return;
-	    }
 		// reveal the current cell
 		cell.setRevealed(true);
 	    //if its a NUMBER cell then reveal it but dont continue flood
