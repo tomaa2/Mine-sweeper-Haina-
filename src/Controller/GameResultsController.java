@@ -21,8 +21,12 @@ public class GameResultsController {
 	private static final String RESULTS_FILE_PATH = "gamehistory.csv";
 
 	// Time format: HH:MM:SS (for duration and times in CSV)
-	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+//	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	private static final DateTimeFormatter DATETIME_FORMATTER =
+	        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
+	private static final DateTimeFormatter TIME_ONLY_FORMATTER =
+	        DateTimeFormatter.ofPattern("HH:mm:ss");
 	public GameResultsController() {
 	}
 
@@ -70,22 +74,45 @@ public class GameResultsController {
 	 * Parse time from CSV. Supports both LocalDateTime ISO string (old) and
 	 * "HH:MM:SS" (new).
 	 */
+//	private LocalDateTime parseDateTimeOrTime(String raw) {
+//		if (raw == null || raw.isEmpty()) {
+//			return LocalDateTime.now();
+//		}
+//		try {
+//			if (raw.contains("T")) {
+//				// old format: full LocalDateTime
+//				return LocalDateTime.parse(raw);
+//			} else {
+//				// new format: only time HH:MM:SS -> attach today's date
+//				LocalTime t = LocalTime.parse(raw, DATETIME_FORMATTER);
+//				return LocalDate.now().atTime(t);
+//			}
+//		} catch (Exception e) {
+//			return LocalDateTime.now();
+//		}
+//	}
+
+
 	private LocalDateTime parseDateTimeOrTime(String raw) {
-		if (raw == null || raw.isEmpty()) {
-			return LocalDateTime.now();
-		}
-		try {
-			if (raw.contains("T")) {
-				// old format: full LocalDateTime
-				return LocalDateTime.parse(raw);
-			} else {
-				// new format: only time HH:MM:SS -> attach today's date
-				LocalTime t = LocalTime.parse(raw, DATETIME_FORMATTER);
-				return LocalDate.now().atTime(t);
-			}
-		} catch (Exception e) {
-			return LocalDateTime.now();
-		}
+	    if (raw == null || raw.isBlank()) return null;
+
+	    raw = raw.trim();
+	    try {
+	        if (raw.contains("T")) {
+	            // old format: ISO LocalDateTime (e.g., 2025-12-30T11:57:26)
+	            return LocalDateTime.parse(raw);
+	        }
+	        if (raw.contains("/")) {
+	            // new format: dd/MM/yyyy HH:mm:ss  (what you currently write)
+	            return LocalDateTime.parse(raw, DATETIME_FORMATTER);
+	        }
+	        // very old format: HH:mm:ss only
+	        LocalTime t = LocalTime.parse(raw, TIME_ONLY_FORMATTER);
+	        return LocalDate.now().atTime(t);
+	    } catch (Exception e) {
+	        // better than "now": return null so you notice bad data
+	        return null;
+	    }
 	}
 
 	/* ================== Load game history ================== */
@@ -112,6 +139,9 @@ public class GameResultsController {
 				long durationSeconds = parseDuration(line[5]);
 				LocalDateTime startTime = parseDateTimeOrTime(line[6]);
 				LocalDateTime endTime = parseDateTimeOrTime(line[7]);
+				if (startTime == null || endTime == null) {
+				    continue; 
+				}
 				String gameResult = line.length > 8 ? line[8] : "";
 				GameSummary g = new GameSummary(player1, player2, difficulty, score, durationSeconds, startTime,
 						endTime, gameResult);
