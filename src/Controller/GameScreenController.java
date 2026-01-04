@@ -439,7 +439,7 @@ public class GameScreenController {
 		int remainingLives = gameController.getLives();
 
 		// create result(game over) screen
-		String result = remainingLives > 0 ? "🎉 YOU WON!" : "💣 GAME OVER";
+		String result = remainingLives > 0 ? "🎉 YOU WIN!" : "💣 GAME OVER";
 		// custom dialog
 		Dialog<ButtonType> dialog = new Dialog<>();
 		dialog.setTitle("Game Over");
@@ -484,6 +484,7 @@ public class GameScreenController {
 		confirm.setContentText("Your game progress will be saved.");
 		confirm.showAndWait().ifPresent(response -> {
 			if (response == javafx.scene.control.ButtonType.OK) {
+	            gameController.setGameQuit(true);
 				// stop timer and save game
 				if (gameTimer != null)
 					gameTimer.stop();

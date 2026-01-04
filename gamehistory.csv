@@ -1,10 +1,1 @@
-ID,Player1,Player2,Difficulty,Score,Duration,StartTime,EndTime,GameResult
-1,sharbel,arwa,EASY,14,0:06:04,30/12/2025 11:57:26,30/12/2025 11:57:26,
-2,toma1,toma2,EASY,21,0:00:36,30/12/2025 11:57:26,30/12/2025 11:57:26,
-3,toma1,toma2,EASY,24,0:00:44,30/12/2025 11:57:26,30/12/2025 11:57:26,
-4,hjkl,hjk,EASY,15,0:01:55,30/12/2025 11:57:26,30/12/2025 11:57:26,
-5,tomaaa,bshara,EASY,2,0:02:40,30/12/2025 01:21:58,30/12/2025 01:24:38,Defeat
-6,aaaa,qqqq,EASY,0,0:00:55,30/12/2025 01:27:07,30/12/2025 01:28:02,Victory
-7,ee,ttt,EASY,49,0:07:32,30/12/2025 12:52:52,30/12/2025 13:00:25,Victory
-8,hh,yyy,EASY,3,0:00:42,30/12/2025 13:27:59,30/12/2025 13:28:42,Victory
-9,rrrrr,ggg,EASY,1,0:01:35,28/12/2025 13:31:17,28/12/2025 13:32:53,Victory
+"ID","Player1","Player2","Difficulty","Score","Duration","StartTime","EndTime"
