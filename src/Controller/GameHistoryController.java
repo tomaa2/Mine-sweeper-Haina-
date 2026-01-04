@@ -98,13 +98,22 @@ public class GameHistoryController {
         totalGamesValueLabel.setText(String.valueOf(total));
 
         // Count victories — assumed: positive score = win
+//        long victories = games.stream()
+//                .filter(g -> {
+//                    try {
+//                        return Integer.parseInt(g.getScore()) > 0;
+//                    } catch (Exception e) {
+//                        return false;
+//                    }
+//                })
+//                .count();
+//
+//        victoriesValueLabel.setText(String.valueOf(victories));
+     // Count victories — based on GameResult (Victory/Defeat)
         long victories = games.stream()
                 .filter(g -> {
-                    try {
-                        return Integer.parseInt(g.getScore()) > 0;
-                    } catch (Exception e) {
-                        return false;
-                    }
+                    String r = g.getGameresult();
+                    return r != null && r.trim().equalsIgnoreCase("Victory");
                 })
                 .count();
 
@@ -202,9 +211,19 @@ public class GameHistoryController {
 
         // Determine result: Victory / Defeat
         System.out.println("Game result: " + game.getGameresult());
-        String resultText = game.getGameresult().equalsIgnoreCase("Victory")
-				? "Victory 🏆"
-				: "Defeat 💣";
+//        String resultText = game.getGameresult().equalsIgnoreCase("Victory")
+//				? "Victory 🏆"
+//				: "Defeat 💣";
+        String resultText;
+
+        if (game.getGameresult().equalsIgnoreCase("Quit")) {
+            resultText = "Quit 🚪";
+        } else if (game.getGameresult().equalsIgnoreCase("Victory")) {
+            resultText = "Victory 🏆";
+        } else {
+            resultText = "Defeat 💣";
+        }
+
         Label resultLabel = new Label(resultText);
         resultLabel.setStyle("-fx-text-fill: #FFFFFF;");
         resultLabel.setFont(new javafx.scene.text.Font(14));

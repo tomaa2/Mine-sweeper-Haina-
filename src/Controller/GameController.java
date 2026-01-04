@@ -29,7 +29,8 @@ public class GameController {
 	private final SysData sysData; // Access to the questions database
 	private boolean resultSaved = false;   // if  we saved the game results
 	private final Set<String> usedQuestions = new HashSet<>(); //for storing the questions, for not getting the same question twice in a game//
-	
+	public boolean gameQuit = false;
+
 	public GameController(String name1, String name2, GameConfig config) {
 		Player player1 = new Player(name1);
 		Player player2 = new Player(name2);
@@ -138,6 +139,7 @@ public class GameController {
 		// player can activate it later for a cost
 		if(!cell.isRevealed() && !cell.isUsed()) {
 			cell.setRevealed(true);
+			game.modifyScore(1);
 			switchTurn();
 		}
 //		else {
@@ -163,6 +165,7 @@ public class GameController {
 		// revealing surprise cell just reveals it, activation is separate
 		if(!cell.isRevealed() && !cell.isUsed()) {
 			cell.setRevealed(true);
+			game.modifyScore(1);
 			switchTurn();
 		}
 	}
@@ -587,14 +590,19 @@ public class GameController {
 		long durationSecs = Duration.between(StartTime, EndTime).getSeconds();
 
 		String difficultyName = game.getConfig().name();
-
+		String result;
+		if (gameQuit) {
+		    result = "Quit";
+		} else {
+		    result = (game.getLives() > 0) ? "Victory" : "Defeat";
+		}
 		GameSummary summary = new GameSummary(game.getPlayer1().getName(), game.getPlayer2().getName(), difficultyName,
-				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, game.getLives() > 0 ? "Victory" : "Defeat");
+				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, result);
 
 		gameResultsController.addGameHistory(summary);
 		System.out.println("Game result saved successfully.");
 		System.out.println("lives left: " + game.getLives());
-		System.out.println("game results: " + (game.getLives() > 0 ? "Victory" : "Defeat"));
+		System.out.println("game results: " + result);
 		System.out.println("summary results: " + summary.getGameresult());
 	}
 
@@ -629,6 +637,10 @@ public class GameController {
 	public void handleCellClick(int playerIndex, int row, int col) {
 		// TODO Auto-generated method stub
 		
+	}
+  
+	public void setGameQuit(boolean gameQuit) {
+	    this.gameQuit = gameQuit;
 	}
 
 //	public void startGame() {
