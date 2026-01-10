@@ -57,14 +57,14 @@
 
             <!-- CENTER: three cards row -->
             <center>
-                <HBox alignment="CENTER" spacing="40.0" BorderPane.alignment="CENTER">
+               <HBox alignment="CENTER" spacing="40.0" BorderPane.alignment="CENTER">
                     <padding>
                         <Insets top="40.0"/>
                     </padding>
                     <children>
 
                         <!-- Card 1: New Game -->
-                        <VBox alignment="CENTER" spacing="10.0">
+                        <VBox styleClass="menu-card" alignment="CENTER" spacing="10.0">
                             <children>
                                 <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
@@ -89,7 +89,7 @@
                         </VBox>
 
                         <!-- Card 2: Game History -->
-                        <VBox alignment="CENTER" spacing="10.0">
+                        <VBox styleClass="menu-card" alignment="CENTER" spacing="10.0">
                             <children>
                                 <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
@@ -114,11 +114,11 @@
                         </VBox>
 
                         <!-- Card 3: Question Bank -->
-                        <VBox alignment="CENTER" spacing="10.0">
+                        <VBox styleClass="menu-card" alignment="CENTER" spacing="10.0">
                             <children>
                                 <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
-                                        <Image url="@iconss/question-and-answer.png"/>
+                                        <Image url="@iconss/qa.png"/>
                                     </image>
                                 </ImageView>
                                 <Label text="Question Bank">
