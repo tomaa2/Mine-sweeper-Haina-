@@ -10,7 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 
 import Model.GameSummary;
@@ -120,8 +122,13 @@ public class GameResultsController {
 	public void loadGameHistory() {
 		String filePath = RESULTS_FILE_PATH;
 		List<GameSummary> loadedGames = new ArrayList<>();
-
-		try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+		try (CSVReader reader = new CSVReaderBuilder(new FileReader(filePath))
+	            .withCSVParser(new CSVParserBuilder()
+	                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+	                .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER)
+	                .withEscapeChar(CSVWriter.NO_ESCAPE_CHARACTER)
+	                .build())
+	            .build()) {
 			String[] line;
 			reader.readNext(); // skip header row
 
@@ -143,8 +150,11 @@ public class GameResultsController {
 				    continue; 
 				}
 				String gameResult = line.length > 8 ? line[8] : "";
+				String screenshotPath = line.length > 9 ? line[9] : "";
+	            System.out.println("Loaded screenshot path: " + screenshotPath);
+
 				GameSummary g = new GameSummary(player1, player2, difficulty, score, durationSeconds, startTime,
-						endTime, gameResult);
+						endTime, gameResult,screenshotPath);
 				loadedGames.add(g);
 			}
 
@@ -164,11 +174,17 @@ public class GameResultsController {
 		String filePath = RESULTS_FILE_PATH;
 		List<GameSummary> games = SysData.getInstance().getAllGames();
 
-		try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+		try (CSVWriter writer = new CSVWriter(new FileWriter(filePath),
+	            CSVWriter.DEFAULT_SEPARATOR,
+	            CSVWriter.NO_QUOTE_CHARACTER,  // Don't quote fields
+	            CSVWriter.NO_ESCAPE_CHARACTER, // Don't escape anything
+	            CSVWriter.DEFAULT_LINE_END)) {
 
+			
+			
 			// Header row – consistent format
 			writer.writeNext(new String[] { "ID", "Player1", "Player2", "Difficulty", "Score", "Duration", "StartTime",
-					"EndTime", "GameResult" });
+					"EndTime", "GameResult", "ScreenshotPath" });
 
 			int id = 1;
 
@@ -177,8 +193,13 @@ public class GameResultsController {
 				String startTimeStr = g.getStartTime().format(DATETIME_FORMATTER);
 				String endTimeStr = g.getEndTime().format(DATETIME_FORMATTER);
 
+				String screenshotPath = g.getScreenshotPath();
+	            if (screenshotPath == null) {
+	                screenshotPath = ""; // Empty string for old games without screenshots
+	            }
+	            
 				writer.writeNext(new String[] { String.valueOf(id++), g.getPlayer1(), g.getPlayer2(), g.getDifficulty(),
-						g.getScore(), durationStr, startTimeStr, endTimeStr, g.getGameresult() });
+						g.getScore(), durationStr, startTimeStr, endTimeStr, g.getGameresult(),screenshotPath });
 			}
 
 		} catch (Exception e) {

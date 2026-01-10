@@ -1,21 +1,26 @@
 package Controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.io.FileInputStream;
 import Model.GameSummary;
 import Model.SysData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -23,6 +28,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -252,11 +258,138 @@ public class GameHistoryController {
         durationLabel.setStyle("-fx-text-fill: #9ba3c7;");
         durationLabel.setFont(new javafx.scene.text.Font(12));
 
-        HBox rightBox = new HBox(10, difficultyLabel, durationLabel);
+        Button viewButton = new Button("View Game");
+        viewButton.setStyle(
+                "-fx-background-color: #3c465a; " +
+                "-fx-text-fill: white; " +
+                "-fx-background-radius: 6; " +
+                "-fx-padding: 6 12 6 12; " +
+                "-fx-cursor: hand; " +
+                "-fx-font-size: 12px; " +
+                "-fx-font-weight: bold;"
+        );
+
+        // Hover effect
+        viewButton.setOnMouseEntered(e ->
+                viewButton.setStyle(
+                        "-fx-background-color: #505a78; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-background-radius: 6; " +
+                        "-fx-padding: 6 12 6 12; " +
+                        "-fx-cursor: hand; " +
+                        "-fx-font-size: 12px; " +
+                        "-fx-font-weight: bold;"
+                )
+        );
+
+        viewButton.setOnMouseExited(e ->
+                viewButton.setStyle(
+                        "-fx-background-color: #3c465a; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-background-radius: 6; " +
+                        "-fx-padding: 6 12 6 12; " +
+                        "-fx-cursor: hand; " +
+                        "-fx-font-size: 12px; " +
+                        "-fx-font-weight: bold;"
+                )
+        );
+
+        // Click handler - show screenshot
+        viewButton.setOnAction(e -> showGameScreenshot(game));
+        
+        HBox rightBox = new HBox(10, difficultyLabel, durationLabel, viewButton);
         rightBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
 
         row.getChildren().addAll(icon, leftTextBox, spacer, rightBox);
         return row;
+    }
+    
+    
+    // show screenshot
+    //Opens a modal window displaying the game screenshot
+    private void showGameScreenshot(GameSummary game) {
+        try {
+            String screenshotPath = game.getScreenshotPath();
+
+            // Validate screenshot path
+            if (screenshotPath == null || screenshotPath.isEmpty()) {
+                showAlert("Screenshot Not Available", 
+                         "No screenshot was saved for this game.");
+                return;
+            }
+            System.out.println("=== DEBUG showGameScreenshot ===");
+            System.out.println("Raw path from CSV: " + screenshotPath);
+
+            File screenshotFile = new File(screenshotPath);
+            
+            System.out.println("Absolute path: " + screenshotFile.getAbsolutePath());
+            System.out.println("File exists: " + screenshotFile.exists());
+            System.out.println("Is file: " + screenshotFile.isFile());
+            System.out.println("Can read: " + screenshotFile.canRead());
+            
+            if (!screenshotFile.exists()) {
+                showAlert("Screenshot Not Found",
+                         "Screenshot file not found:\n" + screenshotPath);
+                return;
+            }
+
+            // Create new window for screenshot
+            Stage screenshotStage = new Stage();
+            screenshotStage.setTitle("Game Screenshot - " + 
+                    game.getStartTime().format(DATE_TIME_FORMATTER));
+            screenshotStage.initModality(Modality.APPLICATION_MODAL);
+
+            // Load image
+            Image screenshot = new Image(new FileInputStream(screenshotFile));
+            ImageView imageView = new ImageView(screenshot);
+            imageView.setPreserveRatio(true);
+
+            // Create info panel at the top
+            VBox infoPanel = new VBox(10);
+            infoPanel.setStyle("-fx-background-color: #1b2235; -fx-padding: 15;");
+            infoPanel.setAlignment(Pos.CENTER_LEFT);
+
+            Label infoLabel = new Label(String.format(
+                "Players: %s vs %s | Result: %s | Difficulty: %s | Time: %s | Score: %s",
+                game.getPlayer1(),
+                game.getPlayer2(),
+                game.getGameresult(),
+                game.getDifficulty(),
+                formatDuration(game.getDurationSeconds()),
+                game.getScore()
+            ));
+            infoLabel.setStyle("-fx-text-fill: #FFFFFF; -fx-font-size: 14px;");
+            infoPanel.getChildren().add(infoLabel);
+
+            // Add to scroll pane
+            ScrollPane scrollPane = new ScrollPane(imageView);
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
+            scrollPane.setStyle("-fx-background: #060811;");
+
+            // Layout
+            VBox layout = new VBox();
+            layout.getChildren().addAll(infoPanel, scrollPane);
+            VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+            Scene scene = new Scene(layout, 1200, 750);
+            screenshotStage.setScene(scene);
+            screenshotStage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error", "Error loading screenshot:\n" + e.getMessage());
+        }
+    }
+    
+    
+    //Shows an alert dialog
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     /* ========= CLEAR HISTORY ========= */

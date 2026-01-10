@@ -12,6 +12,7 @@ public class GameSummary {
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
 	private String gameResult;
+	private String screenshotPath;
 	
 	
 	public GameSummary() {
@@ -20,7 +21,7 @@ public class GameSummary {
 
 
 	public GameSummary(String player1, String player2, String difficulty, String score, long durationSeconds,LocalDateTime startTime,
-			LocalDateTime endTime, String gameResult) {
+			LocalDateTime endTime, String gameResult,String screenshotPath) {
 		super();
 		this.player1 = player1;
 		this.player2 = player2;
@@ -30,6 +31,7 @@ public class GameSummary {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.gameResult = gameResult;
+		this.screenshotPath = screenshotPath;
 	}
 
 
@@ -78,6 +80,12 @@ public class GameSummary {
 	public long getDurationSeconds() {
 		return durationSeconds;
 	}
+	
+	public String getScreenshotPath() { return screenshotPath; }
+	
+	public void setScreenshotPath(String screenshotPath) {
+        this.screenshotPath = screenshotPath;
+    }
 
 
 	public void setDurationSeconds(long durationSeconds) {

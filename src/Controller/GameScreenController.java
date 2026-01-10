@@ -57,6 +57,8 @@ public class GameScreenController implements GameObserver{
 	private Label player2FlagsLabel;
 	@FXML
 	private GridPane player2Grid;
+	@FXML
+	private javafx.scene.layout.BorderPane gameRootPane;
 	// timer for each turn
 	private AnimationTimer gameTimer;
 	private long startTimeNanos;
@@ -81,6 +83,9 @@ public class GameScreenController implements GameObserver{
 		setupBoards();
 		setupTimer();
 		updateUI();
+		
+		gameController.setGameSceneNode(gameRootPane);
+	    System.out.println("Game scene node set for screenshot capture");
 	}
 
 	private void setupEventHandlers() {

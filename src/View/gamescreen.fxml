@@ -13,7 +13,8 @@
             
 
     <children>
-        <BorderPane AnchorPane.topAnchor="0.0"
+        <BorderPane fx:id="gameRootPane"
+                    AnchorPane.topAnchor="0.0"
                     AnchorPane.bottomAnchor="0.0"
                     AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0">
