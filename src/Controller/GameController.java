@@ -12,6 +12,7 @@ import Model.Board;
 import Model.Cell;
 import Model.CellType;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class GameController{
 	private final Set<String> usedQuestions = new HashSet<>(); //for storing the questions, for not getting the same question twice in a game//
 	public boolean gameQuit = false;
 	private List<GameObserver> observers = new ArrayList<>(); //
+	private javafx.scene.Node gameSceneNode;
 
 	public GameController(String name1, String name2, GameConfig config) {
 		Player player1 = new Player(name1);
@@ -61,6 +63,11 @@ public class GameController{
 			currentPlayer = game.getPlayer1();
 		}
 		game.switchTurn();
+	}
+	
+	public void setGameSceneNode(javafx.scene.Node node) {
+	    this.gameSceneNode = node;
+	    System.out.println("Game scene node set for screenshot capture");
 	}
 
 	public Player getCurrentPlayer() {
@@ -608,14 +615,74 @@ public class GameController{
 		} else {
 		    result = (game.getLives() > 0) ? "Victory" : "Defeat";
 		}
+		
+		String screenshotPath = captureGameScreenshot(gameSceneNode);
+		
 		GameSummary summary = new GameSummary(game.getPlayer1().getName(), game.getPlayer2().getName(), difficultyName,
-				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, result);
+				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, result,screenshotPath);
 
 		gameResultsController.addGameHistory(summary);
 		System.out.println("Game result saved successfully.");
 		System.out.println("lives left: " + game.getLives());
 		System.out.println("game results: " + result);
 		System.out.println("summary results: " + summary.getGameresult());
+	    System.out.println("screenshot saved at: " + screenshotPath);
+	}
+	/**
+	 * Captures a screenshot of the current game board and saves it to the screenshots folder.
+	 * @return The file path of the saved screenshot, or null if capture failed
+	 */
+	private String captureGameScreenshot(javafx.scene.Node gameNode) {
+	    try {
+	        // Check if gameNode is null
+	        if (gameNode == null) {
+	            System.err.println("Cannot capture screenshot: game node is null");
+	            return null;
+	        }
+	        
+	        // Create screenshots directory if it doesn't exist
+	        String projectDir = System.getProperty("user.dir");
+	        File screenshotsDir = new File(projectDir, "screenshots");
+	        
+	        if (!screenshotsDir.exists()) {
+	            screenshotsDir.mkdirs();
+	        }
+	        // Generate filename with timestamp
+	        java.time.format.DateTimeFormatter formatter = 
+	            java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+	        String timestamp = LocalDateTime.now().format(formatter);
+	        String filename = "game_" + timestamp + ".png";
+	        File outputFile = new File(screenshotsDir, filename);
+	        
+	        // Take snapshot of the game container
+	        javafx.scene.image.WritableImage snapshot = 
+	            gameNode.snapshot(new javafx.scene.SnapshotParameters(), null);
+	        
+	        // Save to file
+	        javax.imageio.ImageIO.write(
+	            javafx.embed.swing.SwingFXUtils.fromFXImage(snapshot, null),
+	            "png",
+	            outputFile
+	        );
+	        
+	        String absolutePath = outputFile.getAbsolutePath();
+	        System.out.println("Screenshot saved at: " + absolutePath);
+	        
+	        // Verify file exists
+	        if (outputFile.exists()) {
+	            System.out.println("Screenshot file verified to exist");
+	        } else {
+	            System.err.println("WARNING: Screenshot file does not exist after save!");
+	        }
+	        return absolutePath;
+
+	        
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        System.err.println("Failed to capture game screenshot: " + e.getMessage());
+	        return null;
+	    }
 	}
 
 	public void saveAndEndGame() {

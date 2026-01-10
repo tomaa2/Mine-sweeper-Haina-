@@ -1,7 +1,5 @@
-"ID","Player1","Player2","Difficulty","Score","Duration","StartTime","EndTime","GameResult"
-"1","tyi","cvb","EASY","117","00:06:47","06/01/2026 12:25:32","06/01/2026 12:32:19","Victory"
-"2","yjkl","nm","EASY","28","00:01:08","06/01/2026 13:36:47","06/01/2026 13:37:56","Defeat"
-"3","yuio","jk","EASY","3","00:00:08","06/01/2026 13:38:18","06/01/2026 13:38:26","Quit"
-"4","jjkl","xc","EASY","21","00:03:55","07/01/2026 16:23:31","07/01/2026 16:27:27","Victory"
-"5","sharbel","maram","EASY","104","00:11:50","08/01/2026 12:23:14","08/01/2026 12:35:04","Victory"
-"6","fg","wert","EASY","3","00:00:03","08/01/2026 12:35:45","08/01/2026 12:35:49","Quit"
+ID,Player1,Player2,Difficulty,Score,Duration,StartTime,EndTime,GameResult,ScreenshotPath
+1,sdf,ddd,EASY,1,00:00:04,10/01/2026 20:59:48,10/01/2026 20:59:53,Quit,C:\Users\tomab\git\Mine-sweeper-Haina-\screenshots\game_20260110_205953.png
+2,cx,zz,EASY,3,00:00:04,10/01/2026 21:06:11,10/01/2026 21:06:16,Quit,C:\Users\tomab\git\Mine-sweeper-Haina-\screenshots\game_20260110_210616.png
+3,fdf,dss,EASY,35,00:00:46,10/01/2026 21:11:14,10/01/2026 21:12:01,Defeat,C:\Users\tomab\git\Mine-sweeper-Haina-\screenshots\game_20260110_211201.png
+4,e,d,EASY,26,00:00:44,11/01/2026 01:07:20,11/01/2026 01:08:04,Defeat,C:\Users\tomab\git\Mine-sweeper-Haina-\screenshots\game_20260111_010804.png
