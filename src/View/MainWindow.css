@@ -87,23 +87,30 @@ BorderPane > .top VBox > HBox > ImageView {
     -fx-background-color: transparent;
 }
 
+
+
+
 /* Individual Card VBox */
-.center HBox > VBox {
-    -fx-background-color: #1e2749;
+.menu-card {
+    -fx-background-color: rgba(30, 39, 73, 0.95);
     -fx-background-radius: 16px;
     -fx-padding: 40 35 40 35;
     -fx-spacing: 15;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 25, 0.7, 0, 10);
-    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 18, 0.4, 0, 8);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
     -fx-border-width: 2;
     -fx-border-radius: 16px;
+    -fx-border-insets: 0;
+	-fx-background-insets: 1;
+	-fx-pref-height: 340px;
+    -fx-max-height: 340px;
     -fx-min-width: 280px;
     -fx-max-width: 280px;
     -fx-cursor: hand;
 }
 
 /* Card Hover Effect */
-.center HBox > VBox:hover {
+.menu-card:hover {
     -fx-background-color: #2a3562;
     -fx-border-color: rgba(0, 212, 255, 0.5);
     -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.4), 30, 0.8, 0, 10);
@@ -112,12 +119,12 @@ BorderPane > .top VBox > HBox > ImageView {
 }
 
 /* Card Icons */
-.center HBox > VBox > ImageView {
+.menu-card > ImageView {
     -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.4), 15, 0.6, 0, 0);
 }
 
 /* Card Title Labels */
-.center HBox > VBox > Label:nth-child(2) {
+.menu-card > Label:nth-child(2) {
     -fx-font-family: 'Orbitron', 'Arial Black', sans-serif;
     -fx-font-size: 22px;
     -fx-font-weight: 700;
@@ -126,7 +133,7 @@ BorderPane > .top VBox > HBox > ImageView {
 }
 
 /* Card Description Labels */
-.center HBox > VBox > Label:nth-child(3) {
+.menu-card > Label:nth-child(3) {
     -fx-font-family: 'Exo 2', 'Segoe UI', sans-serif;
     -fx-font-size: 14px;
     -fx-font-weight: 400;

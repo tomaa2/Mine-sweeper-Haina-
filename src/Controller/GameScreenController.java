@@ -271,7 +271,6 @@ public class GameScreenController implements GameObserver{
 	            modeButton.setText("🚩 Flag OFF");
 	            modeButton.setStyle("");
 	        }
-	        return; // important: stop further processing
 	    }
 
 	    // QUESTION activation
