@@ -5,6 +5,7 @@ import Model.Cell;
 import Model.CellType;
 import Model.Question;
 import Model.SoundManager;
+//import Controller.GameObserver;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -27,7 +28,7 @@ import javafx.animation.AnimationTimer;
 
 import java.io.IOException;
 
-public class GameScreenController {
+public class GameScreenController implements GameObserver{
 
 	// FXML fields matching gamescreen.fxml
 	@FXML
@@ -75,6 +76,7 @@ public class GameScreenController {
 
 	// called manually after FXML loads
 	public void initializeAfterLoad() {
+		gameController.addObserver(this);
 		setupEventHandlers();
 		setupBoards();
 		setupTimer();
@@ -135,7 +137,7 @@ public class GameScreenController {
 		return btn;
 	}
 
-	private void handleCellClick(MouseEvent event, int playerIndex, int row, int col) {
+	private void handleCellClick2(MouseEvent event, int playerIndex, int row, int col) {
 		// ignores any click if game is over
 		if (gameOver) {
 			// SoundManager.playGameOver();
@@ -216,12 +218,6 @@ public class GameScreenController {
 
 		else {
 			gameController.revealCell(playerIndex, row, col);
-
-//            Cell clicked = cell; // use the one you already retrieved
-//            if (clicked.getCellType() == CellType.QUESTION && clicked.isRevealed() && !clicked.isUsed()) {
-//                showQuestionPopup(playerIndex, row, col);
-//               
-//            }
 		}
 
 		updateUI();
@@ -231,6 +227,109 @@ public class GameScreenController {
 			showGameOver();
 		}
 	}
+	
+	private void handleCellClick(MouseEvent event, int playerIndex, int row, int col) {
+
+	    // ignore clicks if game is over
+	    if (gameOver) {
+	        return;
+	    }
+
+	    // check turn
+	    int currentPlayerIndex = gameController.getGame().getCurrentPlayerIndex();
+	    if (playerIndex != currentPlayerIndex) {
+	        showAlert("Wrong Board", "It's not your turn!");
+	        return;
+	    }
+
+	    // get board & cell
+	    Board board = (playerIndex == 1)
+	            ? gameController.getBoard1()
+	            : gameController.getBoard2();
+
+	    Cell cell = board.getCell(row, col);
+
+	    // invalid cell or invalid state
+	    if (cell == null ||
+	        (cell.isRevealed() && cell.getCellType() != CellType.QUESTION
+	                && cell.getCellType() != CellType.SURPRISE) ||
+	        cell.isUsed() ||
+	        cell.isFlagged()) {
+	        return;
+	    }
+
+	    SoundManager.playClick();
+
+	    // flag mode or right-click → flag cell
+	    if (event.getButton() == MouseButton.SECONDARY || flagMode) {
+	        gameController.flagCell(playerIndex, row, col);
+	        gameController.switchTurn();
+
+	        // UI-only logic (safe here)
+	        if (flagMode) {
+	            flagMode = false;
+	            modeButton.setText("🚩 Flag OFF");
+	            modeButton.setStyle("");
+	        }
+	        return; // important: stop further processing
+	    }
+
+	    // QUESTION activation
+	    if (cell.getCellType() == CellType.QUESTION && cell.isRevealed() && !cell.isUsed()) {
+	        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+	        confirm.setTitle("Activate Question");
+	        confirm.setHeaderText("Do you want to activate this question cell?");
+	        confirm.setContentText("This will cost points.");
+
+	        confirm.showAndWait().ifPresent(result -> {
+	            if (result == ButtonType.OK) {
+
+	                Question q = gameController.activateQuestionCell(cell);
+
+	                if (q != null) {
+	                    showQuestionPopup(cell, q);
+	                }
+	                
+	                gameController.notifyObservers();
+
+	                if (gameController.checkGameEnd()) {
+	                    showGameOver();
+	                }
+	            }
+	        });
+	        return;
+	    }
+
+	    // SURPRISE activation
+	    if (cell.getCellType() == CellType.SURPRISE && cell.isRevealed() && !cell.isUsed()) {
+	        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+	        confirm.setTitle("Activate Surprise");
+	        confirm.setHeaderText("Do you want to activate this surprise cell?");
+	        confirm.setContentText("This will cost points.");
+
+	        confirm.showAndWait().ifPresent(result -> {
+	            if (result == ButtonType.OK) {
+
+	                gameController.activateSurpriseCell(cell);
+	                gameController.notifyObservers();
+
+	                if (gameController.checkGameEnd()) {
+	                    showGameOver();
+	                }
+	            }
+	        });
+	        return;
+	    }
+
+	    // normal reveal
+	    gameController.revealCell(playerIndex, row, col);
+
+	    // game over check (UI decision only)
+	    if (gameController.checkGameEnd()) {
+	        showGameOver();
+	    }
+	}
+
 
 	private void showQuestionPopup(Cell cell, Question q) {
 		// Question q = gameController.activateQuestionCell(cell);
@@ -261,7 +360,7 @@ public class GameScreenController {
 			if (choice == dBtn)
 				answer = "D";
 			gameController.applyAnswer(q, answer);
-			updateUI();
+			//updateUI();
 
 			if (gameController.checkGameEnd()) {
 				showGameOver();
@@ -313,6 +412,8 @@ public class GameScreenController {
 
 		highlightCurrentPlayer();
 	}
+	
+	
 
 	private void updateGrid(GridPane grid, Board board) {
 		int size = board.getRows();
@@ -548,4 +649,14 @@ public class GameScreenController {
 		error.setContentText(message);
 		error.showAndWait();
 	}
+
+	@Override
+	public void onGameStateChanged() {
+		// TODO Auto-generated method stub
+		System.out.println("Observer notified"); //for testing
+		updateUI();
+	}
+
+	
+	
 }
