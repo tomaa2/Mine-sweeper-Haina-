@@ -16,12 +16,18 @@ public class Board {
 	}
 
 	
-	//
+	//function for creating an empty cell
+	private Cell createCell(int row, int col, CellType type) {
+		Cell cell = new Cell(row,col);
+		cell.setCellType(type);
+		return cell;
+	}
+	
+	//initializing the two boards with empty cells
 	private void initializeCells() {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < columns; j++) {
-				grid[i][j] = new Cell(i, j);
-				// Cell constructor now sets cellType to EMPTY by default
+				grid[i][j] = createCell(i,j,CellType.EMPTY);
 			}
 		}
 	}
@@ -89,12 +95,6 @@ public class Board {
 			return;
 		}
 		
-	    //stop if its a mine/question/surprise
-	    if (cell.getCellType() == CellType.MINE || 
-	        cell.getCellType() == CellType.QUESTION || 
-	        cell.getCellType() == CellType.SURPRISE) {
-	        return;
-	    }
 		// reveal the current cell
 		cell.setRevealed(true);
 	    //if its a NUMBER cell then reveal it but dont continue flood

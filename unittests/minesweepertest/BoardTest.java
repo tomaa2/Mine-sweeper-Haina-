@@ -8,40 +8,54 @@ import Controller.GameController;
 import Model.Board;
 import Model.GameConfig;
 import Model.Player;
-//Toma
+
 class BoardTest {
 
 	@Test
 	void testBoardInitializationEasy() {
-		Board board = new Board(9, 9);
+		GameController gc = new GameController("arwa", "sharbel", GameConfig.EASY);
+		Board board2 = gc.getBoard2();
+		Board board1 = gc.getBoard1();
+	    assertEquals(9, board1.getRows());
+	    assertEquals(9, board1.getColumns());
+	    assertEquals(9, board2.getRows());
+	    assertEquals(9, board2.getColumns());
+	    assertNotNull(board1.getGrid());
+	    assertNotNull(board2.getGrid());
 
-	    assertEquals(9, board.getRows());
-	    assertEquals(9, board.getColumns());
-	    assertNotNull(board.getGrid());
-	    assertEquals(9, board.getGrid().length);
-	    assertEquals(9, board.getGrid()[0].length);
+
 	}
 
 	@Test
 	void testBoardInitializationMedium() {
-		Board board = new Board(13, 13);
+		GameController gc = new GameController("Toma", "bshara", GameConfig.MEDIUM);
+        Board board1 = gc.getBoard1();
+		Board board2 = gc.getBoard2();
 
-	    assertEquals(13, board.getRows());
-	    assertEquals(13, board.getColumns());
-	    assertNotNull(board.getGrid());
-	    assertEquals(13, board.getGrid().length);
-	    assertEquals(13, board.getGrid()[0].length);
+	    assertEquals(13, board2.getRows());
+	    assertEquals(13, board2.getColumns());
+	    assertEquals(13, board1.getColumns());
+	    assertEquals(13, board1.getRows());
+	    assertNotNull(board2.getGrid());
+	    assertNotNull(board1.getGrid());
+
+	   
 	}
 
 	@Test
 	void testBoardInitializationHard() {
-		Board board = new Board(16, 16);
+		GameController gc = new GameController("sharbel", "bshara", GameConfig.HARD);
+		Board board2 = gc.getBoard2();
+        Board board1 = gc.getBoard1();
 
-	    assertEquals(16, board.getRows());
-	    assertEquals(16, board.getColumns());
-	    assertNotNull(board.getGrid());
-	    assertEquals(16, board.getGrid().length);
-	    assertEquals(16, board.getGrid()[0].length);
+	    assertEquals(16, board2.getRows());
+	    assertEquals(16, board2.getColumns());
+	    assertEquals(16, board1.getColumns());
+	    assertEquals(16, board1.getRows());
+	    assertNotNull(board1.getGrid());
+	    assertNotNull(board2.getGrid());
+
+	    
 	}
 	
 

@@ -31,6 +31,8 @@ replay_pid*
 # OS files
 .DS_Store
 Thumbs.db
+<<<<<<< Updated upstream
+=======
 
 # Build output
 bin/
@@ -39,4 +41,5 @@ target/
 
 # Local JavaFX SDKs (if ever inside repo)
 javafx-sdk-*/
-openjfx-*/
+openjfx-*/.DS_Store
+>>>>>>> Stashed changes

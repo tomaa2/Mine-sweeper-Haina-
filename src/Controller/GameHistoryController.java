@@ -98,13 +98,22 @@ public class GameHistoryController {
         totalGamesValueLabel.setText(String.valueOf(total));
 
         // Count victories — assumed: positive score = win
+//        long victories = games.stream()
+//                .filter(g -> {
+//                    try {
+//                        return Integer.parseInt(g.getScore()) > 0;
+//                    } catch (Exception e) {
+//                        return false;
+//                    }
+//                })
+//                .count();
+//
+//        victoriesValueLabel.setText(String.valueOf(victories));
+     // Count victories — based on GameResult (Victory/Defeat)
         long victories = games.stream()
                 .filter(g -> {
-                    try {
-                        return Integer.parseInt(g.getScore()) > 0;
-                    } catch (Exception e) {
-                        return false;
-                    }
+                    String r = g.getGameresult();
+                    return r != null && r.trim().equalsIgnoreCase("Victory");
                 })
                 .count();
 
@@ -201,7 +210,20 @@ public class GameHistoryController {
         } catch (Exception ignored) {}
 
         // Determine result: Victory / Defeat
-        String resultText = isVictory(game) ? "Victory" : "Defeat";
+        System.out.println("Game result: " + game.getGameresult());
+//        String resultText = game.getGameresult().equalsIgnoreCase("Victory")
+//				? "Victory 🏆"
+//				: "Defeat 💣";
+        String resultText;
+
+        if (game.getGameresult().equalsIgnoreCase("Quit")) {
+            resultText = "Quit 🚪";
+        } else if (game.getGameresult().equalsIgnoreCase("Victory")) {
+            resultText = "Victory 🏆";
+        } else {
+            resultText = "Defeat 💣";
+        }
+
         Label resultLabel = new Label(resultText);
         resultLabel.setStyle("-fx-text-fill: #FFFFFF;");
         resultLabel.setFont(new javafx.scene.text.Font(14));
@@ -235,18 +257,6 @@ public class GameHistoryController {
 
         row.getChildren().addAll(icon, leftTextBox, spacer, rightBox);
         return row;
-    }
-
-    /**
-     * Determines whether a game is a victory.
-     * Simple rule: score > 0 = win.
-     */
-    private boolean isVictory(GameSummary game) {
-        try {
-            return Integer.parseInt(game.getScore()) > 0;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     /* ========= CLEAR HISTORY ========= */

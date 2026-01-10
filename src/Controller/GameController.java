@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class GameController {
+public class GameController{
 	private final Game game; // the game instance
 	private Player currentPlayer; // current player turn
 	private LocalDateTime StartTime; // variable for game start time
@@ -29,7 +29,9 @@ public class GameController {
 	private final SysData sysData; // Access to the questions database
 	private boolean resultSaved = false;   // if  we saved the game results
 	private final Set<String> usedQuestions = new HashSet<>(); //for storing the questions, for not getting the same question twice in a game//
-	
+	public boolean gameQuit = false;
+	private List<GameObserver> observers = new ArrayList<>(); //
+
 	public GameController(String name1, String name2, GameConfig config) {
 		Player player1 = new Player(name1);
 		Player player2 = new Player(name2);
@@ -82,40 +84,70 @@ public class GameController {
 	// ------------------------------------ Revealing a
 	// cell-----------------------------------------------//
 	// revealing cells considering each type of cells
+//	public void revealCell2(int playerIndex, int row, int col) {
+//		Board board = getBoardByIndex(playerIndex);
+//		Cell cell = board.getCell(row, col);
+//
+//		if (cell == null || cell.isRevealed() || cell.isFlagged()) {
+//			return;
+//		}
+//		// its stopping the floodReveal
+//		// cell.setRevealed(true);
+//		CellType type = cell.getCellType();
+//		if (type == CellType.EMPTY)
+//			handleEmptyCell(board, row, col);
+//		else {
+//			//cell.setRevealed(true);
+//			switch (cell.getCellType()) {
+//			case MINE -> {
+//				cell.setRevealed(true);
+//				handleMineCell();
+//				}
+//			case EMPTY -> {
+//				cell.setRevealed(true);
+//				handleEmptyCell(board, row, col);
+//				}
+//			case NUMBER -> {
+//				cell.setRevealed(true);
+//				handleNumberCell();
+//				}
+//			case QUESTION -> handleQuestionCell(cell);
+//			case SURPRISE -> handleSurpriseCell(cell);
+//			}
+//		}
+//		checkGameEnd();
+//	}
+
+	
 	public void revealCell(int playerIndex, int row, int col) {
-		Board board = getBoardByIndex(playerIndex);
-		Cell cell = board.getCell(row, col);
+	    Board board = getBoardByIndex(playerIndex);
+	    Cell cell = board.getCell(row, col);
 
-		if (cell == null || cell.isRevealed() || cell.isFlagged()) {
-			return;
-		}
-		// its stopping the floodReveal
-		// cell.setRevealed(true);
-		CellType type = cell.getCellType();
-		if (type == CellType.EMPTY)
-			handleEmptyCell(board, row, col);
-		else {
-			//cell.setRevealed(true);
-			switch (cell.getCellType()) {
-			case MINE -> {
-				cell.setRevealed(true);
-				handleMineCell();
-				}
-			case EMPTY -> {
-				cell.setRevealed(true);
-				handleEmptyCell(board, row, col);
-				}
-			case NUMBER -> {
-				cell.setRevealed(true);
-				handleNumberCell();
-				}
-			case QUESTION -> handleQuestionCell(cell);
-			case SURPRISE -> handleSurpriseCell(cell);
-			}
-		}
-		checkGameEnd();
+	    if (cell == null) {
+	        return;
+	    }
+	    RevealCellTemplate action = switch (cell.getCellType()) {
+	        case MINE ->
+	            new RevealMineCell(this, board, cell, row, col);
+
+	        case EMPTY ->
+	            new RevealEmptyCell(this, board, cell, row, col);
+
+	        case NUMBER ->
+	            new RevealNumberCell(this, board, cell, row, col);
+
+	        case QUESTION ->
+	            new RevealQuestionCell(this, board, cell, row, col);
+
+	        case SURPRISE ->
+	            new RevealSurpriseCell(this, board, cell, row, col);
+	    };
+
+	    action.reveal();
+	    notifyObservers();
 	}
-
+	
+	
 	private void handleMineCell() {
 		game.modifyLives(-1);
 		checkGameEndByLives();
@@ -138,31 +170,16 @@ public class GameController {
 		// player can activate it later for a cost
 		if(!cell.isRevealed() && !cell.isUsed()) {
 			cell.setRevealed(true);
+			game.modifyScore(1);
 			switchTurn();
 		}
-//		else {
-//			Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//	        alert.setTitle("Activate Question");
-//	        alert.setHeaderText("Are you sure you want to activate this question cell?");
-//	        
-//	        alert.showAndWait().ifPresent(result -> {
-//	            if (result == ButtonType.OK) {
-//	                boolean success;
-//	                if (success) {
-//	                    return;
-//	                } else {
-//	                    showError("Failed to activate question. It may not exist.");
-//	                }
-//	            }
-//	        });
-//			//activateQuestionCell(cell);
-//		}
 	}
 
 	private void handleSurpriseCell(Cell cell) {
 		// revealing surprise cell just reveals it, activation is separate
 		if(!cell.isRevealed() && !cell.isUsed()) {
 			cell.setRevealed(true);
+			game.modifyScore(1);
 			switchTurn();
 		}
 	}
@@ -294,7 +311,6 @@ public class GameController {
 			usedQuestions.add(q.getQuestion());
 		}
 			
-		
 	    return q;
 	}
 
@@ -310,7 +326,6 @@ public class GameController {
 
 		// apply rewards/penalties based on game difficulty and question level
 		applyQuestionOutcome(gameLevel, qLevel, correct, rand);
-		
 		
 		checkGameEnd();
 		switchTurn();
@@ -522,7 +537,7 @@ public class GameController {
 			game.modifyScore(penalty); // penalty is already negative in config
 			game.modifyLives(-1);
 		}
-
+		
 		checkGameEnd();
 		switchTurn();
 	}
@@ -587,12 +602,20 @@ public class GameController {
 		long durationSecs = Duration.between(StartTime, EndTime).getSeconds();
 
 		String difficultyName = game.getConfig().name();
-
+		String result;
+		if (gameQuit) {
+		    result = "Quit";
+		} else {
+		    result = (game.getLives() > 0) ? "Victory" : "Defeat";
+		}
 		GameSummary summary = new GameSummary(game.getPlayer1().getName(), game.getPlayer2().getName(), difficultyName,
-				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime);
+				String.valueOf(game.getScore()), durationSecs, StartTime, EndTime, result);
 
 		gameResultsController.addGameHistory(summary);
 		System.out.println("Game result saved successfully.");
+		System.out.println("lives left: " + game.getLives());
+		System.out.println("game results: " + result);
+		System.out.println("summary results: " + summary.getGameresult());
 	}
 
 	public void saveAndEndGame() {
@@ -601,6 +624,33 @@ public class GameController {
 		}
 		saveGameResult();
 	}
+	
+	//-------------------------------------------------------------
+	//---------------------------------------------------------
+	// ================= Observer Pattern =================
+
+	//add observer
+	public void addObserver(GameObserver observer) {
+	    if (observer != null && !observers.contains(observer)) {
+	        observers.add(observer);
+	        System.out.println("Observer added: " + observer.getClass().getName());
+	    }
+	}
+
+	//remove observer
+	public void removeObserver(GameObserver observer) {
+	    observers.remove(observer);
+	}
+
+	//notify all observers
+	public void notifyObservers() {
+	    for (GameObserver observer : observers) {
+	        observer.onGameStateChanged();
+	    }
+	}
+
+	//-------------------------------------------------------------
+	//-------------------------------------------------------------
 
 	//////////////// getters for view
 	public int getScore() {
@@ -626,6 +676,10 @@ public class GameController {
 	public void handleCellClick(int playerIndex, int row, int col) {
 		// TODO Auto-generated method stub
 		
+	}
+  
+	public void setGameQuit(boolean gameQuit) {
+	    this.gameQuit = gameQuit;
 	}
 
 //	public void startGame() {
