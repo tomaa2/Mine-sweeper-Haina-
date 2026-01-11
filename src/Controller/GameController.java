@@ -643,7 +643,7 @@ public class GameController{
 	        // Create screenshots directory if it doesn't exist
 	        String projectDir = System.getProperty("user.dir");
 	        File screenshotsDir = new File(projectDir, "screenshots");
-	        
+	        //System.out.println(projectDir  + "screen:     "  + screenshotsDir);
 	        if (!screenshotsDir.exists()) {
 	            screenshotsDir.mkdirs();
 	        }

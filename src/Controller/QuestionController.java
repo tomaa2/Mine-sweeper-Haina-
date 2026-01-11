@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import javafx.scene.control.ComboBox;
 
 import Model.Question;
 import Model.SysData;
@@ -138,7 +138,9 @@ public class QuestionController {
 
         // 6. Initial counters
         updateCounters();
+
     }
+
 
     /**
      * Creates the "Actions" column (edit & delete buttons for each question row).
@@ -526,8 +528,9 @@ public class QuestionController {
             }
             correctAnswerField.setText(correctLetter);
 
-            questionDifficultyCombo.getSelectionModel()
-                    .select(existingQuestion.getQuestionDifficulty());
+            String existingDiff = existingQuestion.getQuestionDifficulty(); // "1".."4"
+            questionDifficultyCombo.getSelectionModel().select(numberToTextDifficulty(existingDiff));
+
 
         } else {
             questionDifficultyCombo.getSelectionModel().select("EASY");
@@ -582,28 +585,41 @@ public class QuestionController {
                 String correct = correctAnswerField.getText().trim();
 
                 // User enters only the letter A/B/C/D, we map to the full text
-                String correctLetter = correct.toUpperCase();
-                String correctAnswer;
+//                String correctLetter = correct.toUpperCase();
+//                String correctAnswer;
+//
+//                switch (correctLetter) {
+//                    case "A":
+//                        correctAnswer = aA;
+//                        break;
+//                    case "B":
+//                        correctAnswer = aB;
+//                        break;
+//                    case "C":
+//                        correctAnswer = aC;
+//                        break;
+//                    case "D":
+//                        correctAnswer = aD;
+//                        break;
+//                    default:
+//                        showError("Correct answer must be the letter A, B, C, or D.");
+//                        return null;
+//                }
+             // User enters only the letter A/B/C/D, we store ONLY the letter (uniform format)
+                String correctLetter = correct.toUpperCase().trim();
 
-                switch (correctLetter) {
-                    case "A":
-                        correctAnswer = aA;
-                        break;
-                    case "B":
-                        correctAnswer = aB;
-                        break;
-                    case "C":
-                        correctAnswer = aC;
-                        break;
-                    case "D":
-                        correctAnswer = aD;
-                        break;
-                    default:
-                        showError("Correct answer must be the letter A, B, C, or D.");
-                        return null;
+                if (!correctLetter.equals("A") && !correctLetter.equals("B")
+                        && !correctLetter.equals("C") && !correctLetter.equals("D")) {
+                    showError("Correct answer must be the letter A, B, C, or D.");
+                    return null;
                 }
 
+                String correctAnswer = correctLetter; // <-- store the LETTER ONLY
+
                 String questionDiff = questionDifficultyCombo.getValue();
+                if ((questionDiff == null || questionDiff.isBlank()) && isEditMode) {
+                    questionDiff = numberToTextDifficulty(existingQuestion.getQuestionDifficulty());
+                }
                 if (questionDiff == null || questionDiff.isBlank()) {
                     questionDiff = "EASY";
                 }
@@ -616,6 +632,17 @@ public class QuestionController {
         });
 
         return dialog.showAndWait().orElse(null);
+    }
+
+    private String numberToTextDifficulty(String diff) {
+        if (diff == null) return "EASY";
+        return switch (diff.trim()) {
+            case "1" -> "EASY";
+            case "2" -> "MEDIUM";
+            case "3" -> "HARD";
+            case "4" -> "EXPERT";
+            default -> "EASY";
+        };
     }
 
     /**

@@ -1,0 +1,172 @@
+/* =========================
+   GLOBAL (optional)
+   ========================= */
+.root {
+    -fx-font-family: "Segoe UI";
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+/* Generic buttons look better */
+.button {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-font-weight: 800;
+}
+
+/* Clear button (your "Clear") */
+.button:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* =========================
+   COMBO BOX (Fix text + dropdown)
+   ========================= */
+
+.combo-box-base {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(34,211,238,0.35);
+    -fx-border-radius: 14;
+    -fx-padding: 4 10;
+}
+
+.combo-box-base:hover {
+    -fx-border-color: rgba(34,211,238,0.85);
+    -fx-effect: dropshadow(gaussian, rgba(34,211,238,0.35), 14, 0.25, 0, 0);
+}
+
+/* Selected value text (when closed) */
+.combo-box-base > .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+/* Prompt text sometimes appears like normal text; keep it readable */
+.combo-box-base:showing > .list-cell,
+.combo-box-base > .list-cell:filled {
+    -fx-text-fill: white;
+}
+
+/* Arrow color */
+.combo-box-base .arrow {
+    -fx-background-color: white;
+}
+
+/* Dropdown list background */
+.combo-box-popup .list-view {
+    -fx-background-color: #1e293b;
+    -fx-border-color: rgba(34,211,238,0.35);
+}
+
+/* Dropdown items */
+.combo-box-popup .list-view .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: #1e293b;
+    -fx-padding: 8 12;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(34,211,238,0.18);
+}
+
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: rgba(34,211,238,0.28);
+}
+
+
+/* =========================
+   TEXT FIELD (Search)
+   ========================= */
+
+.text-field {
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: rgba(255,255,255,0.55);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.14);
+    -fx-border-radius: 12;
+    -fx-padding: 8 10;
+}
+
+.text-field:focused {
+    -fx-border-color: rgba(34,211,238,0.85);
+    -fx-effect: dropshadow(gaussian, rgba(34,211,238,0.25), 14, 0.25, 0, 0);
+}
+
+
+/* =========================
+   TABLE VIEW (Dark theme)
+   ========================= */
+
+.table-view {
+    -fx-background-color: transparent;
+
+    -fx-control-inner-background: #1c2541;
+    -fx-control-inner-background-alt: #1f2a44;
+
+    -fx-table-cell-border-color: rgba(255,255,255,0.08);
+
+    -fx-selection-bar: rgba(34,211,238,0.28);
+    -fx-selection-bar-non-focused: rgba(34,211,238,0.18);
+
+    -fx-text-background-color: white;
+
+    -fx-border-color: rgba(34,211,238,0.35);
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+}
+
+/* Header background */
+.table-view .column-header-background {
+    -fx-background-color: #243257;
+    -fx-background-radius: 14 14 0 0;
+    -fx-border-color: rgba(34,211,238,0.25);
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Header cells */
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+/* Header text */
+.table-view .column-header .label {
+    -fx-text-fill: #22d3ee;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+}
+
+/* Table cells text */
+.table-view .table-cell {
+    -fx-text-fill: #e5e7eb;
+    -fx-font-size: 12px;
+}
+
+/* Row hover */
+.table-row-cell:hover {
+    -fx-background-color: rgba(255,255,255,0.06);
+}
+
+/* Scroll bars dark */
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.table-view .scroll-bar .track {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-background-radius: 10;
+}
+
+.table-view .scroll-bar .thumb {
+    -fx-background-color: rgba(34,211,238,0.25);
+    -fx-background-radius: 10;
+}
+
+.table-view .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(34,211,238,0.40);
+}
