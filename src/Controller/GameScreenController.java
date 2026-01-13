@@ -28,7 +28,7 @@ import javafx.animation.AnimationTimer;
 
 import java.io.IOException;
 
-public class GameScreenController implements GameObserver{
+public class GameScreenController implements GameObserver {
 
 	// FXML fields matching gamescreen.fxml
 	@FXML
@@ -83,9 +83,9 @@ public class GameScreenController implements GameObserver{
 		setupBoards();
 		setupTimer();
 		updateUI();
-		
+
 		gameController.setGameSceneNode(gameRootPane);
-	    System.out.println("Game scene node set for screenshot capture");
+		System.out.println("Game scene node set for screenshot capture");
 	}
 
 	private void setupEventHandlers() {
@@ -135,7 +135,7 @@ public class GameScreenController implements GameObserver{
 		btn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		btn.setMinSize(25, 25);
 		btn.setPrefSize(30, 30);
-		btn.setStyle("-fx-background-color: #cccccc; -fx-border-color: #999999; -fx-font-size: 12px; -fx-padding: 0;");
+		btn.getStyleClass().add("cell-button");
 
 		btn.setOnMouseClicked(e -> handleCellClick(e, playerIndex, row, col));
 
@@ -169,6 +169,7 @@ public class GameScreenController implements GameObserver{
 		// right click or flag mode = flag
 		if (event.getButton() == MouseButton.SECONDARY || flagMode) {
 			gameController.flagCell(playerIndex, row, col);
+			SoundManager.playFlagPlace();
 			gameController.switchTurn();
 			// turn off flag mode after using it
 			if (flagMode) {
@@ -203,6 +204,7 @@ public class GameScreenController implements GameObserver{
 			});
 		}
 		if (cell.getCellType() == CellType.SURPRISE && cell.isRevealed() && !cell.isUsed()) {
+			SoundManager.playSurpriseOpen();
 			Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
 			confirm.setTitle("Activate Surprise");
 			confirm.setHeaderText("Do you want to activate this surprise cell?");
@@ -232,108 +234,110 @@ public class GameScreenController implements GameObserver{
 			showGameOver();
 		}
 	}
-	
+
 	private void handleCellClick(MouseEvent event, int playerIndex, int row, int col) {
 
-	    // ignore clicks if game is over
-	    if (gameOver) {
-	        return;
-	    }
+		// ignore clicks if game is over
+		if (gameOver) {
+			return;
+		}
 
-	    // check turn
-	    int currentPlayerIndex = gameController.getGame().getCurrentPlayerIndex();
-	    if (playerIndex != currentPlayerIndex) {
-	        showAlert("Wrong Board", "It's not your turn!");
-	        return;
-	    }
+		// check turn
+		int currentPlayerIndex = gameController.getGame().getCurrentPlayerIndex();
+		if (playerIndex != currentPlayerIndex) {
+			showAlert("Wrong Board", "It's not your turn!");
+			return;
+		}
 
-	    // get board & cell
-	    Board board = (playerIndex == 1)
-	            ? gameController.getBoard1()
-	            : gameController.getBoard2();
+		// get board & cell
+		Board board = (playerIndex == 1) ? gameController.getBoard1() : gameController.getBoard2();
 
-	    Cell cell = board.getCell(row, col);
+		Cell cell = board.getCell(row, col);
 
-	    // invalid cell or invalid state
-	    if (cell == null ||
-	        (cell.isRevealed() && cell.getCellType() != CellType.QUESTION
-	                && cell.getCellType() != CellType.SURPRISE) ||
-	        cell.isUsed() ||
-	        cell.isFlagged()) {
-	        return;
-	    }
+		// invalid cell or invalid state
+		if (cell == null || (cell.isRevealed() && cell.getCellType() != CellType.QUESTION
+				&& cell.getCellType() != CellType.SURPRISE) || cell.isUsed() || cell.isFlagged()) {
+			return;
+		}
 
-	    SoundManager.playClick();
+		SoundManager.playClick();
 
-	    // flag mode or right-click → flag cell
-	    if (event.getButton() == MouseButton.SECONDARY || flagMode) {
-	        gameController.flagCell(playerIndex, row, col);
-	        gameController.switchTurn();
+		// flag mode or right-click → flag cell
+		if (event.getButton() == MouseButton.SECONDARY || flagMode) {
+			gameController.flagCell(playerIndex, row, col);
+			gameController.switchTurn();
 
-	        // UI-only logic (safe here)
-	        if (flagMode) {
-	            flagMode = false;
-	            modeButton.setText("🚩 Flag OFF");
-	            modeButton.setStyle("");
-	        }
-	    }
+			// UI-only logic (safe here)
+			if (flagMode) {
+				flagMode = false;
+				modeButton.setText("🚩 Flag OFF");
+				modeButton.getStyleClass().remove("flag-mode-active");
+			}
 
-	    // QUESTION activation
-	    if (cell.getCellType() == CellType.QUESTION && cell.isRevealed() && !cell.isUsed()) {
-	        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-	        confirm.setTitle("Activate Question");
-	        confirm.setHeaderText("Do you want to activate this question cell?");
-	        confirm.setContentText("This will cost points.");
+		}
 
-	        confirm.showAndWait().ifPresent(result -> {
-	            if (result == ButtonType.OK) {
+		// QUESTION activation
+		if (cell.getCellType() == CellType.QUESTION && cell.isRevealed() && !cell.isUsed()) {
+			Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+			confirm.setTitle("Activate Question");
+			confirm.setHeaderText("Do you want to activate this question cell?");
+			confirm.setContentText("This will cost points.");
 
-	                Question q = gameController.activateQuestionCell(cell);
+			confirm.showAndWait().ifPresent(result -> {
+				if (result == ButtonType.OK) {
 
-	                if (q != null) {
-	                    showQuestionPopup(cell, q);
-	                }
-	                
-	                gameController.notifyObservers();
+					Question q = gameController.activateQuestionCell(cell);
 
-	                if (gameController.checkGameEnd()) {
-	                    showGameOver();
-	                }
-	            }
-	        });
-	        return;
-	    }
+					if (q != null) {
+						showQuestionPopup(cell, q);
+					}
 
-	    // SURPRISE activation
-	    if (cell.getCellType() == CellType.SURPRISE && cell.isRevealed() && !cell.isUsed()) {
-	        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-	        confirm.setTitle("Activate Surprise");
-	        confirm.setHeaderText("Do you want to activate this surprise cell?");
-	        confirm.setContentText("This will cost points.");
+					gameController.notifyObservers();
 
-	        confirm.showAndWait().ifPresent(result -> {
-	            if (result == ButtonType.OK) {
+					if (gameController.checkGameEnd()) {
+						showGameOver();
+					}
+				}
+			});
+			return;
+		}
 
-	                gameController.activateSurpriseCell(cell);
-	                gameController.notifyObservers();
+		// SURPRISE activation
+		if (cell.getCellType() == CellType.SURPRISE && cell.isRevealed() && !cell.isUsed()) {
+			Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+			confirm.setTitle("Activate Surprise");
+			confirm.setHeaderText("Do you want to activate this surprise cell?");
+			confirm.setContentText("This will cost points.");
 
-	                if (gameController.checkGameEnd()) {
-	                    showGameOver();
-	                }
-	            }
-	        });
-	        return;
-	    }
+			confirm.showAndWait().ifPresent(result -> {
+				if (result == ButtonType.OK) {
 
-	    // normal reveal
-	    gameController.revealCell(playerIndex, row, col);
+					gameController.activateSurpriseCell(cell);
+					gameController.notifyObservers();
 
-	    // game over check (UI decision only)
-	    if (gameController.checkGameEnd()) {
-	        showGameOver();
-	    }
+					if (gameController.checkGameEnd()) {
+						showGameOver();
+					}
+				}
+			});
+			return;
+		}
+
+		// shake reveal
+		Cell cellBeforeReveal = board.getCell(row, col);
+		CellType typeBeforeReveal = cellBeforeReveal.getCellType();
+
+		gameController.revealCell(playerIndex, row, col);
+
+		// screen shake if mine was hit
+		if (typeBeforeReveal == CellType.MINE) {
+			playScreenShake();
+		}
+		// game over check
+		if (gameController.checkGameEnd()) {
+			showGameOver();
+		}
 	}
-
 
 	private void showQuestionPopup(Cell cell, Question q) {
 		// Question q = gameController.activateQuestionCell(cell);
@@ -363,8 +367,11 @@ public class GameScreenController implements GameObserver{
 				answer = "C";
 			if (choice == dBtn)
 				answer = "D";
+			// play sound and apply answer
+			boolean isCorrect = q.getCorrectAnswer().equalsIgnoreCase(answer);
+			SoundManager.playAnswerResult(isCorrect);
 			gameController.applyAnswer(q, answer);
-			//updateUI();
+			// updateUI();
 
 			if (gameController.checkGameEnd()) {
 				showGameOver();
@@ -400,11 +407,19 @@ public class GameScreenController implements GameObserver{
 			turnLabel.setText("Time: " + secs + "s");
 		}
 	}
-
+	//track previous score for animation
+	private int previousScore = 0;
 	private void updateUI() {
-		scoreLabel.setText("Score: " + gameController.getScore());
-		livesLabel.setText(String.valueOf(gameController.getLives()));
-
+	    int currentScore = gameController.getScore();
+	    scoreLabel.setText("Score: " + currentScore);
+	    if (currentScore > previousScore) {
+	        animateScoreChange(true);
+	    } else if (currentScore < previousScore) {
+	        animateScoreChange(false);
+	    }
+	    previousScore = currentScore;
+	    updateLivesDisplay();
+		
 		String currentName = gameController.getCurrentPlayer().getName();
 		currentPlayerLabel.setText("Current: " + currentName);
 
@@ -416,9 +431,26 @@ public class GameScreenController implements GameObserver{
 
 		highlightCurrentPlayer();
 	}
-	
-	
 
+	private void updateLivesDisplay() {
+	    int currentLives = gameController.getLives();
+	    int maxLives = 10;
+	    
+	    StringBuilder hearts = new StringBuilder();
+	    
+	    //filled hearts for current lives
+	    for (int i = 0; i < currentLives; i++) {
+	        hearts.append("♥ ");
+	    }
+	    
+	    //empty hearts for lost lives
+	    for (int i = currentLives; i < maxLives; i++) {
+	        hearts.append("♡ ");
+	    }
+	    
+	    livesLabel.setText(hearts.toString().trim());
+	}
+	
 	private void updateGrid(GridPane grid, Board board) {
 		int size = board.getRows();
 
@@ -434,40 +466,58 @@ public class GameScreenController implements GameObserver{
 		}
 	}
 
+	// shakes screen when mine is hit
+	private void playScreenShake() {
+		javafx.animation.TranslateTransition shake = new javafx.animation.TranslateTransition(
+				javafx.util.Duration.millis(50), gameRootPane);
+		shake.setFromX(0);
+		shake.setToX(8);
+		shake.setCycleCount(6);
+		shake.setAutoReverse(true);
+		shake.setOnFinished(e -> gameRootPane.setTranslateX(0));
+		shake.play();
+	}
+
 	private void updateCellButton(Button btn, Cell cell) {
+	    btn.getStyleClass().removeIf(style -> style.startsWith("cell-"));
+	    btn.setStyle("");
 
-		String baseStyle = "-fx-font-size: 12px; -fx-padding: 0; -fx-border-color: #999999;";
 		if (cell.isRevealed()) {
-			btn.getStyleClass().add("cell-revealed");
-
 			switch (cell.getCellType()) {
 			case MINE -> {
-				btn.setText("💣");
-				btn.setStyle(baseStyle + "-fx-background-color: #ff6666;");
+	            btn.setText("💣");
+	            btn.getStyleClass().add("cell-mine");
 			}
 			case NUMBER -> {
 				btn.setText(String.valueOf(cell.getNumber()));
-				btn.setStyle(baseStyle + "-fx-background-color: #ffffff;");
+		        btn.getStyleClass().add("cell-revealed");
+				btn.getStyleClass().add("cell-number");
+				btn.getStyleClass().add("cell-" + cell.getNumber());
 			}
 			case EMPTY -> {
 				btn.setText("");
-				btn.setStyle(baseStyle + "-fx-background-color: #ffffff;");
+				btn.getStyleClass().add("cell-empty-revealed");
 			}
 			case QUESTION -> {
 				btn.setText(cell.isUsed() ? "✓" : "❓");
-				btn.setStyle(baseStyle + "-fx-background-color: #ffff99;");
+				btn.getStyleClass().add("cell-question");
+				if (cell.isUsed()) {
+					btn.getStyleClass().add("cell-used");
+				}
 			}
 			case SURPRISE -> {
 				btn.setText(cell.isUsed() ? "✓" : "🎁");
-				btn.setStyle(baseStyle + "-fx-background-color: #ff99ff;");
+				btn.getStyleClass().add("cell-surprise");
+				if (cell.isUsed()) {
+					btn.getStyleClass().add("cell-used");
+				}
 			}
 			}
 		} else if (cell.isFlagged()) {
 			btn.setText("🚩");
-			btn.setStyle(baseStyle + "-fx-background-color: #ffcc00;");
+			btn.getStyleClass().add("cell-flagged");
 		} else {
 			btn.setText("");
-			btn.setStyle(baseStyle + "-fx-background-color: #cccccc; -fx-border-color: #999999;");
 		}
 	}
 
@@ -508,20 +558,24 @@ public class GameScreenController implements GameObserver{
 	private void highlightCurrentPlayer() {
 		int current = gameController.getGame().getCurrentPlayerIndex();
 
-		String activeStyle = "-fx-border-color: #00cc00; -fx-border-width: 3; -fx-border-style: solid;";
-		String inactiveStyle = "-fx-border-color: transparent; -fx-border-width: 3; -fx-border-style: solid;";
-		player1Grid.setStyle(current == 1 ? activeStyle : inactiveStyle);
-		player2Grid.setStyle(current == 2 ? activeStyle : inactiveStyle);
+		// Player 1 panel
+		player1Grid.getStyleClass().removeAll("player-panel-active", "player-panel-inactive");
+		player1Grid.getStyleClass().add(current == 1 ? "player-panel-active" : "player-panel-inactive");
+
+		// Player 2 panel
+		player2Grid.getStyleClass().removeAll("player-panel-active", "player-panel-inactive");
+		player2Grid.getStyleClass().add(current == 2 ? "player-panel-active" : "player-panel-inactive");
+
 	}
 
 	private void toggleMode() {
 		flagMode = !flagMode;
 		if (flagMode) {
 			modeButton.setText("🚩 Flag ON");
-			modeButton.setStyle("-fx-background-color: #ffcc00");
+			modeButton.getStyleClass().add("flag-mode-active");
 		} else {
 			modeButton.setText("🚩 Flag OFF");
-			modeButton.setStyle("");
+			modeButton.getStyleClass().remove("flag-mode-active");
 		}
 
 	}
@@ -535,6 +589,9 @@ public class GameScreenController implements GameObserver{
 			gameTimer.stop();
 		}
 		gameOver = true;
+		// play win or lose sound
+		boolean won = gameController.getLives() > 0;
+		SoundManager.playGameEnd(won);
 
 		// Collect end-game data
 		String p1 = gameController.getGame().getPlayer1().getName();
@@ -589,7 +646,7 @@ public class GameScreenController implements GameObserver{
 		confirm.setContentText("Your game progress will be saved.");
 		confirm.showAndWait().ifPresent(response -> {
 			if (response == javafx.scene.control.ButtonType.OK) {
-	            gameController.setGameQuit(true);
+				gameController.setGameQuit(true);
 				// stop timer and save game
 				if (gameTimer != null)
 					gameTimer.stop();
@@ -601,6 +658,19 @@ public class GameScreenController implements GameObserver{
 		});
 	}
 
+	//animates score label on change
+	private void animateScoreChange(boolean increased) {
+	    String styleClass = increased ? "score-up" : "score-down";
+	    
+	    scoreLabel.getStyleClass().add(styleClass);
+	    
+	    //remove the class after 300ms
+	    javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+	        javafx.util.Duration.millis(300)
+	    );
+	    pause.setOnFinished(e -> scoreLabel.getStyleClass().remove(styleClass));
+	    pause.play();
+	}
 	private void handleNewGame(Node source) {
 		Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
 		confirm.setTitle("New Game");
@@ -657,10 +727,8 @@ public class GameScreenController implements GameObserver{
 	@Override
 	public void onGameStateChanged() {
 		// TODO Auto-generated method stub
-		System.out.println("Observer notified"); //for testing
+		System.out.println("Observer notified"); // for testing
 		updateUI();
 	}
 
-	
-	
 }
