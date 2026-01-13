@@ -52,23 +52,27 @@ Label {
 
 /* New Game Button in Top Bar */
 #newGameButton {
-    -fx-background-color: #00ff88;
+    -fx-background-color: linear-gradient(to bottom, #00ff88, #00cc66);
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
-    -fx-padding: 8 20;
+    -fx-background-radius: 8;
+    -fx-padding: 10 24;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, #00ff88, 3, 0.5, 0, 3);
+    -fx-effect: dropshadow(gaussian, #00ff88, 8, 0.4, 0, 3);
 }
 
 #newGameButton:hover {
-    -fx-background-color: #00ff99;
-    -fx-effect: dropshadow(gaussian, #00ff88, 3, 0.7, 0, 3);
+    -fx-background-color: linear-gradient(to bottom, #33ff99, #00dd77);
+    -fx-effect: dropshadow(gaussian, #00ff88, 15, 0.6, 0, 4);
+    -fx-scale-x: 1.05; 
+    -fx-scale-y: 1.05; 
 }
 
 #newGameButton:pressed {
-    -fx-background-color: #00dd77;
+    -fx-background-color: linear-gradient(to bottom, #00cc66, #00aa55); 
+    -fx-scale-x: 0.97; 
+    -fx-scale-y: 0.97; 
 }
 
 /* Status Bar Labels */
@@ -78,10 +82,9 @@ Label {
 }
 
 #livesLabel {
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-text-fill: #ff3366;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, #ff3366, 0.65, 0.5, 0, 0);
 }
 
 .top HBox > HBox > Label:first-child {
@@ -122,7 +125,11 @@ Label {
 #modeButton:pressed {
     -fx-background-color: #9000cc;
 }
-
+#modeButton.flag-mode-active {
+    -fx-background-color: linear-gradient(to bottom, #ffcc00, #e6b800); 
+    -fx-text-fill: #1a1a2e; 
+    -fx-effect: dropshadow(gaussian, #ffcc00, 12, 0.6, 0, 3); 
+}
 /* ============================================
    CENTER - PLAYER BOARDS AREA
    ============================================ */
@@ -203,36 +210,45 @@ GridPane {
    These styles will apply to buttons added to the grid
    ============================================ */
 .cell-button {
-    -fx-background-color: #1e2749;
-    -fx-background-radius: 3;
-    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: linear-gradient(to bottom, #4a5580, #353d60);
+    -fx-border-color: #5a6590;
     -fx-border-width: 1;
-    -fx-border-radius: 3;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-min-width: 35px;
-    -fx-min-height: 35px;
-    -fx-max-width: 35px;
-    -fx-max-height: 35px;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 4, 0, 1, 2);
 }
 
 .cell-button:hover {
-    -fx-background-color: #2a3562;
-    -fx-border-color: rgba(0, 212, 255, 0.5);
-    -fx-effect: dropshadow(gaussian, #00d4ff, 8, 0.5, 0, 0);
+    -fx-background-color: linear-gradient(to bottom, #3a4575, #2d365c);
+    -fx-border-color: #00d4ff;
+    -fx-effect: dropshadow(gaussian, #00d4ff, 12, 0.6, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
 .cell-button:pressed {
-    -fx-background-color: #141b3d;
+    -fx-background-color: linear-gradient(to bottom, #e0e4eb, #d0d4db);
+    -fx-border-color: #b0b4bb;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
 }
 
 /* Revealed cell */
 .cell-revealed {
-    -fx-background-color: white;
-    -fx-border-color: rgba(255, 255, 255, 0.05);
-    -fx-cursor: default;
+    -fx-background-color: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
 }
 
 .cell-revealed:hover {
@@ -248,36 +264,36 @@ GridPane {
 }
 /* Cell with mine */
 .cell-mine {
-    -fx-background-color: #ff3366;
-    -fx-text-fill: white;
-    -fx-font-size: 18px;
-    -fx-effect: dropshadow(gaussian, #ff3366, 12, 0.7, 0, 0);
+    -fx-background-color: linear-gradient(to bottom, #ff4466, #cc2244);
+    -fx-text-fill: white; 
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(gaussian, #ff3366,6 ,0.4,0, 0);
+    -fx-border-color: #ff6688;
 }
 
 /* Cell with flag */
 .cell-flagged {
     -fx-background-color: #ffd900;
-    -fx-text-fill: white;
     -fx-font-size: 16px;
-    -fx-effect: dropshadow(gaussian, #ffd900, 12, 0.7, 0, 0);
+    -fx-text-fill: #1a1a2e;
+    -fx-effect: dropshadow(gaussian, #ffd900, 5, 0.3, 0, 0);
 }
 
 /* Number cells - different colors for each number */
-.cell-1 { -fx-text-fill: #00d4ff; }
-.cell-2 { -fx-text-fill: #00ff88; }
-.cell-3 { -fx-text-fill: #ffd900; }
-.cell-4 { -fx-text-fill: #ff6b35; }
-.cell-5 { -fx-text-fill: #ff3366; }
-.cell-6 { -fx-text-fill: #b14aff; }
-.cell-7 { -fx-text-fill: #ff1493; }
-.cell-8 { -fx-text-fill: #ff0000; }
+.cell-1 { -fx-text-fill: #0066ff;-fx-font-weight: bold; }
+.cell-2 { -fx-text-fill: #00aa44;-fx-font-weight: bold; }
+.cell-3 { -fx-text-fill: #ff3333;-fx-font-weight: bold; }
+.cell-4 { -fx-text-fill: #000099;-fx-font-weight: bold; }
+.cell-5 { -fx-text-fill: #990000;-fx-font-weight: bold; }
+.cell-6 { -fx-text-fill: #009999;-fx-font-weight: bold; }
+.cell-7 { -fx-text-fill: #000000;-fx-font-weight: bold; }
+.cell-8 { -fx-text-fill: #666666;-fx-font-weight: bold; }
 
 /* Question cell */
 .cell-question {
-    -fx-background-color: #00ff88;
-    -fx-text-fill: white;
+    -fx-background-color: #00ff88;-fx-text-fill: #1a1a2e;
     -fx-font-size: 18px;
-    -fx-effect: dropshadow(gaussian, #00ff88, 12, 0.7, 0, 0);
+    -fx-effect: dropshadow(gaussian, #00ff88, 5, 0.3, 0, 0);
 }
 
 /* Surprise cell */
@@ -285,7 +301,7 @@ GridPane {
     -fx-background-color: #b14aff;
     -fx-text-fill: white;
     -fx-font-size: 16px;
-    -fx-effect: dropshadow(gaussian, #b14aff, 12, 0.7, 0, 0);
+    -fx-effect: dropshadow(gaussian, #b14aff, 5, 0.3, 0, 0);
 }
 
 /* Used special cell */
@@ -328,22 +344,38 @@ Region {
     -fx-background-radius: 10;
 }
 
-/*   ACTIVE PLAYER HIGHLIGHT
- You can add this class dynamically in Java to highlight active player */
-.active-player {
-    -fx-border-color: #00ff88 !important;
-    -fx-border-width: 3 !important;
-    -fx-effect: dropshadow(gaussian, #00ff88, 25, 0.8, 0, 0);
+.player-panel-active {
+    -fx-border-color: #00ff88; 
+    -fx-border-width: 4; 
+    -fx-effect: dropshadow(gaussian, #00ff88, 25, 0.7, 0, 0); 
 }
 
-/* ============================================
-   ANIMATION CLASSES (Optional - add in Java)
-   ============================================ */
+.player-panel-inactive {
+    -fx-border-color: #2a3562; 
+    -fx-border-width: 3;
+    -fx-opacity: 0.85; 
+}
+
+.score-up {
+    -fx-text-fill: #00ff88; 
+    -fx-scale-x: 1.3; 
+    -fx-scale-y: 1.3; 
+    -fx-effect: dropshadow(gaussian, #00ff88, 15, 0.8, 0, 0); 
+}
+
+.score-down {
+    -fx-text-fill: #ff4466; 
+    -fx-scale-x: 1.3; 
+    -fx-scale-y: 1.3; 
+    -fx-effect: dropshadow(gaussian, #ff4466, 15, 0.8, 0, 0);
+}
+
 .pulse {
     -fx-effect: dropshadow(gaussian, #00d4ff, 20, 0.8, 0, 0);
 }
 
-.shake {
+.screen-shake {
+    -fx-translate-x: 3; 
 }
 
 
