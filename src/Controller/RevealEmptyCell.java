@@ -2,6 +2,7 @@ package Controller;
 
 import Model.Board;
 import Model.Cell;
+import Model.SoundManager;
 
 public class RevealEmptyCell extends RevealCellTemplate{
 
@@ -17,7 +18,8 @@ public class RevealEmptyCell extends RevealCellTemplate{
 	
 	@Override
 	protected void applyRevealEffect() {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stu
+		SoundManager.playRevealEmpty();
 		gameController.getGame().modifyScore(1);
 	}
 	
